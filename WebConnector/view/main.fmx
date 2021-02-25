@@ -1,0 +1,187 @@
+object FormMain: TFormMain
+  Left = 0
+  Top = 0
+  Caption = 'Web-Connector'
+  ClientHeight = 499
+  ClientWidth = 867
+  Position = OwnerFormCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnClose = FormClose
+  OnShow = FormShow
+  DesignerMasterStyle = 0
+  object EditClientID: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 1
+    Position.X = 72.000000000000000000
+    Position.Y = 416.000000000000000000
+    Size.Width = 505.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object Label1: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 418.000000000000000000
+    Size.Width = 57.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'ClientID:'
+    TabOrder = 2
+  end
+  object Label2: TLabel
+    Position.X = 8.000000000000000000
+    Position.Y = 450.000000000000000000
+    Size.Width = 65.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Callback ID:'
+    TabOrder = 3
+  end
+  object EditCallbackID: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 4
+    Position.X = 74.000000000000000000
+    Position.Y = 448.000000000000000000
+    Enabled = False
+    Size.Width = 273.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object bt_qtest: TButton
+    Position.X = 752.000000000000000000
+    Position.Y = 418.000000000000000000
+    Size.Width = 105.000000000000000000
+    Size.Height = 25.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 7
+    Text = 'Local Query Test'
+    OnClick = bt_qtestClick
+  end
+  object lb_rows: TLabel
+    Position.X = 80.000000000000000000
+    Position.Y = 384.000000000000000000
+    Size.Width = 89.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 9
+  end
+  object StatusBar1: TStatusBar
+    Align = Top
+    ShowSizeGrip = True
+    Size.Width = 867.000000000000000000
+    Size.Height = 41.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 11
+    object Label3: TLabel
+      Position.X = 512.000000000000000000
+      Position.Y = 14.000000000000000000
+      Size.Width = 121.000000000000000000
+      Size.Height = 17.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Public Web-Server IP:'
+      TabOrder = 0
+    end
+    object ed_WebServer: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      TabOrder = 1
+      Position.X = 630.000000000000000000
+      Position.Y = 10.000000000000000000
+      Size.Width = 169.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object bt_IPSet: TCornerButton
+      Hint = 
+        'Reset or change the connection to the server, ex: '#39'localhost'#39' fo' +
+        'r testing.'
+      Position.X = 802.000000000000000000
+      Position.Y = 10.000000000000000000
+      Sides = [Top, Left, Bottom, Right]
+      Size.Width = 33.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = 'Set'
+      XRadius = 3.000000000000000000
+      YRadius = 3.000000000000000000
+      ParentShowHint = False
+      ShowHint = True
+      OnClick = bt_IPSetClick
+    end
+    object lbl_ConnectorStatus: TLabel
+      Position.X = 360.000000000000000000
+      Position.Y = 16.000000000000000000
+      Size.Width = 137.000000000000000000
+      Size.Height = 17.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Connector Enabled'
+      TabOrder = 3
+    end
+  end
+  object ListBox1: TListBox
+    Align = Top
+    Position.Y = 41.000000000000000000
+    Size.Width = 867.000000000000000000
+    Size.Height = 328.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 13
+    DisableFocusEffect = True
+    DefaultItemStyles.ItemStyle = ''
+    DefaultItemStyles.GroupHeaderStyle = ''
+    DefaultItemStyles.GroupFooterStyle = ''
+    Viewport.Width = 863.000000000000000000
+    Viewport.Height = 324.000000000000000000
+  end
+  object MainMenu1: TMainMenu
+    Left = 160
+    Top = 40
+    object MenuItem1: TMenuItem
+      Text = '&File'
+      object MenuItem2: TMenuItem
+        Locked = True
+        Text = 'e&Xit'
+      end
+    end
+    object MenuItem3: TMenuItem
+      Text = '&Configure'
+      object MenuItem4: TMenuItem
+        Locked = True
+        Text = '&IP'
+        OnClick = MenuItem4Click
+      end
+    end
+  end
+  object bt_browser: TButton
+    Position.X = 598.000000000000000000
+    Position.Y = 420.000000000000000000
+    Size.Width = 135.000000000000000000
+    Size.Height = 61.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 16
+    Text = 'Open Browser Test'
+    OnClick = bt_browserClick
+  end
+  object PrototypeBindSource1: TPrototypeBindSource
+    AutoActivate = True
+    AutoPost = False
+    FieldDefs = <
+      item
+        Name = 'Version'
+        ReadOnly = False
+      end
+      item
+        Name = 'IPAddress'
+        ReadOnly = False
+      end>
+    ScopeMappings = <>
+    OnCreateAdapter = PrototypeBindSource1CreateAdapter
+    Left = 424
+    Top = 224
+  end
+  object FDStanStorageJSONLink1: TFDStanStorageJSONLink
+    Left = 322
+    Top = 135
+  end
+end

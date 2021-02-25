@@ -1,0 +1,20 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
+        <VerInfo_Keys>CompanyName=SoftWare Page, LLC.;FileDescription=WebConnector binary;FileVersion=1.0.1.136;InternalName=WebConnector;LegalCopyright=Copyright © 2018 SoftWare Page, LLC.  ALL RIGHTS RESERVED.;LegalTrademarks=SmartProducerConsumer Grade™;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=ProSchool 3 Web Connector;ProductVersion=1.0.1.135;Comments=-Author Ted B. Rybicki Sr. SW Engineer/Architech</VerInfo_Keys>
+        <VerInfo_Build>136</VerInfo_Build>
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_Release>1</VerInfo_Release>
+    </PropertyGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType>OptionSet</Borland.ProjectType>
+        <BorlandProject>
+            <Delphi.Personality/>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+</Project>

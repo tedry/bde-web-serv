@@ -1,0 +1,15 @@
+﻿[DSClientCallbackChannelManager1]
+Coordinates=0,0,188,33
+
+[SQLConnection1]
+Coordinates=207,1,97,33
+
+[FDConnection1]
+Coordinates=88,1,90,33
+
+[FDQuery1]
+Coordinates=0,0,69,213
+
+[FDQueryWorker]
+Coordinates=88,1,93,51
+
