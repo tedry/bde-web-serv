@@ -1,0 +1,292 @@
+object FormMain: TFormMain
+  Left = 0
+  Top = 0
+  Caption = 'Callback REST Web Server Ver 1.6.0.135 2019'
+  ClientHeight = 514
+  ClientWidth = 828
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop, iPhone, iPad]
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  DesignerMasterStyle = 0
+  object ButtonStart: TButton
+    Position.X = 8.000000000000000000
+    Position.Y = 16.000000000000000000
+    Size.Width = 73.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    Text = 'Start'
+    OnClick = ButtonStartClick
+  end
+  object ButtonStop: TButton
+    Position.X = 88.000000000000000000
+    Position.Y = 16.000000000000000000
+    Size.Width = 73.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    Text = 'Stop'
+    OnClick = ButtonStopClick
+  end
+  object EditPort: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 3
+    Text = '80'
+    Position.X = 16.000000000000000000
+    Position.Y = 72.000000000000000000
+    Size.Width = 100.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object Label1: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 56.000000000000000000
+    Size.Width = 120.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Web-Port:'
+  end
+  object ButtonOpenBrowser: TButton
+    Position.X = 16.000000000000000000
+    Position.Y = 106.000000000000000000
+    Size.Width = 145.000000000000000000
+    Size.Height = 37.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 4
+    Text = 'Open Browser Test'
+    OnClick = ButtonOpenBrowserClick
+  end
+  object TabControl1: TTabControl
+    Anchors = [akLeft, akTop, akRight]
+    Position.X = 168.000000000000000000
+    Position.Y = 18.000000000000000000
+    Size.Width = 649.000000000000000000
+    Size.Height = 385.000000000000000000
+    Size.PlatformDefault = False
+    TabIndex = 0
+    TabOrder = 5
+    TabPosition = PlatformDefault
+    Sizes = (
+      649s
+      359s
+      649s
+      359s
+      649s
+      359s)
+    object TabItemGUID: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = True
+      Size.Width = 54.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'GUIDs'
+      OnClick = TabItemGUIDClick
+      ExplicitSize.cx = 54.000000000000000000
+      ExplicitSize.cy = 26.000000000000000000
+      object ListBoxGUID: TListBox
+        Align = Client
+        Size.Width = 649.000000000000000000
+        Size.Height = 359.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 5
+        DisableFocusEffect = True
+        DefaultItemStyles.ItemStyle = ''
+        DefaultItemStyles.GroupHeaderStyle = ''
+        DefaultItemStyles.GroupFooterStyle = ''
+        Viewport.Width = 645.000000000000000000
+        Viewport.Height = 355.000000000000000000
+      end
+    end
+    object TabItemLog: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = False
+      Size.Width = 40.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'Log'
+      OnClick = TabItemLogClick
+      ExplicitSize.cx = 40.000000000000000000
+      ExplicitSize.cy = 26.000000000000000000
+      object MemoLog: TMemo
+        Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+        DataDetectorTypes = []
+        Align = Client
+        Size.Width = 649.000000000000000000
+        Size.Height = 359.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 5
+        OnDblClick = MemoLogDblClick
+        Viewport.Width = 649.000000000000000000
+        Viewport.Height = 359.000000000000000000
+      end
+    end
+    object TabItemQuery: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = False
+      Size.Width = 53.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'Query'
+      OnClick = TabItemQueryClick
+      ExplicitSize.cx = 53.000000000000000000
+      ExplicitSize.cy = 26.000000000000000000
+      object StringGrid1: TStringGrid
+        Align = Client
+        CanFocus = True
+        ClipChildren = True
+        Size.Width = 649.000000000000000000
+        Size.Height = 359.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        Viewport.Width = 649.000000000000000000
+        Viewport.Height = 359.000000000000000000
+      end
+    end
+  end
+  object Label2: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 152.000000000000000000
+    Text = 'Data-Port:'
+    TabOrder = 8
+  end
+  object ed_data_port: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 9
+    Position.X = 16.000000000000000000
+    Position.Y = 168.000000000000000000
+    OnKeyDown = ed_data_portKeyDown
+  end
+  object Panel1: TPanel
+    Position.X = 24.000000000000000000
+    Position.Y = 280.000000000000000000
+    Size.Width = 120.000000000000000000
+    Size.Height = 121.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 12
+    object Label3: TLabel
+      Align = Top
+      TextSettings.HorzAlign = Center
+      Text = 'Test -> Connector'
+      TabOrder = 0
+    end
+    object bt_Echo: TButton
+      Position.X = 714.000000000000000000
+      Position.Y = 176.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 28.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 6
+      Text = 'BroadCast'
+      OnClick = bt_EchoClick
+    end
+    object bt_Query: TButton
+      Position.X = 16.000000000000000000
+      Position.Y = 30.000000000000000000
+      TabOrder = 5
+      Text = 'Query'
+      OnClick = bt_QueryClick
+    end
+  end
+  object StatusBar1: TStatusBar
+    Position.Y = 492.000000000000000000
+    ShowSizeGrip = True
+    Size.Width = 828.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 14
+    object statusbar_label1: TLabel
+      Align = Client
+      Size.Width = 828.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'statusbar_label1'
+      TabOrder = 0
+    end
+  end
+  object NavigatorBindSourceDB1: TBindNavigator
+    Position.X = 168.000000000000000000
+    Position.Y = 402.000000000000000000
+    Size.Width = 240.000000000000000000
+    Size.Height = 25.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 17
+    DataSource = BindSourceDB1
+    xRadius = 4.000000000000000000
+    yRadius = 4.000000000000000000
+  end
+  object ed_broadcastmsg: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 20
+    Text = 
+      'Message selected connector; Admin is Re-starting web server now ' +
+      'with new code. Please restart your connecotr(s).'
+    Position.X = 8.000000000000000000
+    Position.Y = 456.000000000000000000
+    Size.Width = 724.000000000000000000
+    Size.Height = 30.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object chk_AutoInsert: TCheckBox
+    IsChecked = True
+    Position.X = 384.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 105.000000000000000000
+    Size.Height = 19.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 23
+    Text = 'AutoInsert'
+  end
+  object btn_EnableClient: TButton
+    Position.X = 16.000000000000000000
+    Position.Y = 208.000000000000000000
+    Size.Width = 137.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 26
+    Text = 'Enable Client'
+    OnClick = btn_EnableClientClick
+  end
+  object btn_DisableClient: TButton
+    Position.X = 16.000000000000000000
+    Position.Y = 240.000000000000000000
+    Size.Width = 137.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 27
+    Text = 'Disable Client'
+    OnClick = btn_DisableClientClick
+  end
+  object BindSourceDB1: TBindSourceDB
+    DataSet = ServerContainer1.FDQuery1
+    ScopeMappings = <>
+    Left = 400
+    Top = 208
+  end
+  object BindingsList1: TBindingsList
+    Methods = <>
+    OutputConverters = <>
+    Left = 20
+    Top = 5
+    object LinkGridToDataSourceBindSourceDB1: TLinkGridToDataSource
+      Category = 'Quick Bindings'
+      DataSource = BindSourceDB1
+      GridControl = StringGrid1
+      Columns = <>
+    end
+  end
+end

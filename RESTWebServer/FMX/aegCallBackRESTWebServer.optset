@@ -1,0 +1,18 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
+        <VerInfo_Build>135</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=SoftWare Page, LLC.;FileDescription=REST Web Server binary with Callback support.;FileVersion=1.0.1.135;InternalName=Forward facing WEB Server;LegalCopyright=Copyright © 2018 SoftWare Page, LLC.  ALL RIGHTS RESERVED.;LegalTrademarks=SmartProducerConsumer Grade™;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=ProSchool 3 Web Server;ProductVersion=1.0.1.135;Comments=by - Ted B. Rybicki Sr. SW Engineer/Architech</VerInfo_Keys>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Release>1</VerInfo_Release>
+        <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
+    </PropertyGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType>OptionSet</Borland.ProjectType>
+        <BorlandProject>
+            <Delphi.Personality/>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+</Project>

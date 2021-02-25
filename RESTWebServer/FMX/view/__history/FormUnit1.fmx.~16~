@@ -1,0 +1,150 @@
+object FormMain: TFormMain
+  Left = 0
+  Top = 0
+  Caption = 'Callback RESET Web Server '
+  ClientHeight = 437
+  ClientWidth = 828
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop, iPhone, iPad]
+  OnCreate = FormCreate
+  OnShow = FormShow
+  DesignerMasterStyle = 0
+  object ButtonStart: TButton
+    Position.X = 8.000000000000000000
+    Position.Y = 16.000000000000000000
+    Size.Width = 73.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    Text = 'Start'
+    OnClick = ButtonStartClick
+  end
+  object ButtonStop: TButton
+    Position.X = 88.000000000000000000
+    Position.Y = 16.000000000000000000
+    Size.Width = 73.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    Text = 'Stop'
+    OnClick = ButtonStopClick
+  end
+  object EditPort: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 3
+    Text = '8080'
+    Position.X = 16.000000000000000000
+    Position.Y = 80.000000000000000000
+    Size.Width = 100.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object Label1: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 56.000000000000000000
+    Size.Width = 120.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Port'
+  end
+  object ButtonOpenBrowser: TButton
+    Position.X = 16.000000000000000000
+    Position.Y = 128.000000000000000000
+    Size.Width = 113.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 4
+    Text = 'Open Browser'
+    OnClick = ButtonOpenBrowserClick
+  end
+  object bt_DS: TButton
+    Position.X = 8.000000000000000000
+    Position.Y = 352.000000000000000000
+    TabOrder = 5
+    Text = 'bt_DS'
+    OnClick = bt_DSClick
+  end
+  object bt_Test: TButton
+    Position.X = 8.000000000000000000
+    Position.Y = 392.000000000000000000
+    TabOrder = 6
+    Text = 'bt_Test'
+    OnClick = bt_TestClick
+  end
+  object TabControl1: TTabControl
+    Position.X = 168.000000000000000000
+    Position.Y = 16.000000000000000000
+    Size.Width = 649.000000000000000000
+    Size.Height = 385.000000000000000000
+    Size.PlatformDefault = False
+    TabIndex = 0
+    TabOrder = 7
+    TabPosition = PlatformDefault
+    Sizes = (
+      649s
+      359s
+      649s
+      359s
+      649s
+      359s)
+    object TabItemGUID: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = True
+      Size.Width = 54.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'GUIDs'
+      object MemoGUID: TMemo
+        Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+        DataDetectorTypes = []
+        Align = Client
+        Size.Width = 649.000000000000000000
+        Size.Height = 359.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 5
+        Viewport.Width = 645.000000000000000000
+        Viewport.Height = 355.000000000000000000
+      end
+    end
+    object TabItemStatus: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = False
+      Size.Width = 53.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'Status'
+    end
+    object TabItemLog: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = False
+      Size.Width = 40.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'Log'
+      object Memo1: TMemo
+        Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+        DataDetectorTypes = []
+        Size.Width = 649.000000000000000000
+        Size.Height = 359.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 5
+        OnDblClick = Memo1DblClick
+        Viewport.Width = 645.000000000000000000
+        Viewport.Height = 355.000000000000000000
+      end
+    end
+  end
+end

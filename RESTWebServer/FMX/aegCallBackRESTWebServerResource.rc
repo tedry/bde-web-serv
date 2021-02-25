@@ -1,0 +1,4 @@
+PngImage_1 RCDATA "images\\collapse.png"
+PngImage_2 RCDATA "images\\expand.png"
+PngImage_4 RCDATA "images\\favicon-96x96.png"
+PngImage_3 RCDATA "images\\searchicongrey.png"

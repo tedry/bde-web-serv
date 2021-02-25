@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{43E89B6D-A17D-442A-8E4F-10596B98E74E}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="aegCallBackRESTWebServer.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\..\WebConnector\aegWebConnector.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="aegCallBackRESTWebServer">
+        <MSBuild Projects="aegCallBackRESTWebServer.dproj"/>
+    </Target>
+    <Target Name="aegCallBackRESTWebServer:Clean">
+        <MSBuild Projects="aegCallBackRESTWebServer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="aegCallBackRESTWebServer:Make">
+        <MSBuild Projects="aegCallBackRESTWebServer.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="aegWebConnector">
+        <MSBuild Projects="..\..\..\WebConnector\aegWebConnector.dproj"/>
+    </Target>
+    <Target Name="aegWebConnector:Clean">
+        <MSBuild Projects="..\..\..\WebConnector\aegWebConnector.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="aegWebConnector:Make">
+        <MSBuild Projects="..\..\..\WebConnector\aegWebConnector.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="aegCallBackRESTWebServer;aegWebConnector"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="aegCallBackRESTWebServer:Clean;aegWebConnector:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="aegCallBackRESTWebServer:Make;aegWebConnector:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

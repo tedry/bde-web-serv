@@ -1,0 +1,2812 @@
+﻿<html>
+<!-- test -->
+<head>
+    <title>ProSchool 3 Web Portal</title>
+    <link async rel="icon" type="image/png" sizes="96x96" href="images/favicon-96x96.png">
+    <noscript>
+        <link href="css/main-light.css" rel="stylesheet" type="text/css">
+    </noscript>
+    <link async rel="stylesheet" type="text/css" href="css/main.css" />
+    <!-- <link async rel="stylesheet" type="text/css" href="css/main-light.css" /> -->
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.min.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script defer src="https://cdn.datatables.net/plug-ins/1.10.19/sorting/datetime-moment.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz"
+        crossorigin="anonymous">
+    <script defer src="js/base64-min.js"></script>
+    <script defer src="js/json2-min.js"></script>
+    <script defer src="js/serverfunctionexecutor-min.js"></script>
+    <script defer src="js/connection.js"></script>
+    <script defer src="<#serverfunctionsjs>"></script>
+    <script>
+        // --- Global Script Vars ---
+        var _selectedStudent_ID = ''; // Set when a student is selected by user, used in search for aval class.
+        var _selectedStudent_Name = '';
+        // The following are set in ? & read in EnrollStudent()
+        var _selectedClass_Code = '';
+        var _selectedClass_Name = '';
+        var _selectedClass_Type = '';
+        var _selectedTuition_Code = '';
+        var _selectedTeacher_Code = '';
+        var _selectedClass_ID = '';
+        var _selectedStudent_Age = '';
+        var paymentAmount = [];
+        var paymentItems = [];
+        var paySum = 0.00;
+        var notLgdIn = "";
+        var gymName = "";
+        var gymEmail = "";
+        var pageerror;
+
+
+        window.onscroll = function () { scrollFunction() };
+        function scrollFunction() {
+            if (document.body.scrollTop > 220 || document.documentElement.scrollTop > 220) {
+                document.getElementById("gotoTopBtn").style.display = "block";
+            } else {
+                document.getElementById("gotoTopBtn").style.display = "none";
+            }
+        }
+        // function changeTitle() {
+        //     try {
+        //         var dataOBJ = serverMethods().aegGymName();
+        //         var jsonStringDataRes = JSON.parse(dataOBJ["result"]);
+        //     }
+        //     catch(error){ errorServerMethodHandler('GymName'); }
+        //     var jsonStringGymName = jsonStringDataRes["aaData"];
+        //     document.title = "ProSchool 3 Web Portal for " + jsonStringGymName[0];
+        //     gymName = jsonStringGymName[0];
+        //     return jsonStringGymName[0];
+        // }
+        // function getGymAddress() {
+        //     try {
+        //         var addressOBJ = serverMethods().aegGymAddress();
+        //         var addressJSON = JSON.parse(addressOBJ["result"]);
+        //     }
+        //     catch(error){ errorServerMethodHandler('GymAddress'); }
+
+        //     var address = addressJSON["aaData"][0][0] + " " +
+        //         addressJSON["aaData"][0][1] + ", " +
+        //         addressJSON["aaData"][0][2] + " " +
+        //         addressJSON["aaData"][0][3] + " | " +
+        //         addressJSON["aaData"][0][4];
+        //     return address;
+        // }
+        // function getGymEmail() {
+        //     try {
+        //         var dataOBJ = serverMethods().aegGymEmail();
+        //         var jsonStringDataRes = JSON.parse(dataOBJ["result"]);
+        //     }
+        //     catch(error){ errorServerMethodHandler('GymEmail'); }
+
+        //     var jsonStringGymName = jsonStringDataRes["aaData"];
+        //     return jsonStringGymName[0];
+        // }
+        // function updateAddressBar() {
+        //     var mainTitleAddress = document.getElementById('mainTitleBarAddress');
+        //     var mainTitleBar = document.getElementById('mainTitleBar');
+
+        //     mainTitleBar.innerHTML = "ProSchool 3 Web Portal for " + changeTitle();
+        //     mainTitleAddress.innerHTML = getGymAddress() + " | " + getGymEmail();
+        // }
+        function makeCookie(cname, cvalue, exdays) { //Makes a Cookie. Must provide name, value, expires (in days)
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+        function fetchCookie(cname) { // Return a currently saved Cookie. Provide name, returns value and expires.
+            var name = cname + "=",
+                ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+        function logoutFunct() {  //Logout Function -- Logs user out
+            var sessionCookieAMR = fetchCookie("dssessionid");
+            if (sessionCookieAMR != "") { //check if cookie exists
+                document.cookie = 'dssessionid' + '=; expires=Thu, 01-Jan-70 00:00:01 GMT;'; //delete cookie
+                location.reload(); //reload the page
+            }
+        }
+        function saveGUID(guid) { //Saves GUID to a Cookie for later use.
+            makeCookie("guid", guid, 7);
+        }
+        function saveEmail(email) { //Saves email of gym to a cookie for later use.
+            makeCookie("email", email, 7);
+        }
+        function show(id) { // Show HTML Element. Expctd: html ID. Provides an easy way of implementing 'onload' actions when showing an HTML Element.
+            document.getElementById(id).style.display = 'block';
+            if (id.indexOf("modal-overlay") >= 0) {
+                $(function () {
+                    $('body').addClass('no-scroll');
+                });
+            }
+            switch(id){
+
+                case 'paymentInfo':
+                    if (document.getElementById('FICardAddress').innerText == '111 Placeholder St.') {document.getElementById(id).style.display = 'none'};
+                    break;
+
+                case 'PwChgFrm':
+                    document.getElementById("currentPw").focus();
+                    var currentPw = document.getElementById("currentPw");
+                    currentPw.addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if ((event.keyCode === 13) && (currentPw.value !== '')) {
+                            document.getElementById("newPwFirst").focus();
+                        }
+                        if (event.keyCode === 27) {
+                            hide('PwChgFrm-modal-overlay')
+                            hide('PwChgFrm');
+                        }
+                    });
+                    var newPwFirst = document.getElementById("newPwFirst");
+                    newPwFirst.classList.remove('input-error');
+                    newPwFirst.classList.remove('input-good');
+                    document.getElementById("pwError").style.display = 'none';
+                    document.getElementById("pwMatchError").style.display = 'none';
+
+                    newPwFirst.addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (testPasswordValid(newPwFirst.value)) {
+                            document.getElementById("pwError").style.display = 'none';
+                            newPwFirst.classList.add('input-good');
+                            newPwFirst.classList.remove('input-error');
+                        } else {
+                            document.getElementById("pwError").style.display = 'block';
+                            newPwFirst.classList.add('input-error');
+                            newPwFirst.classList.remove('input-good');
+                        };
+                        if ((event.keyCode === 13) && (newPwFirst.value !== '') && (testPasswordValid(newPwFirst.value))) {
+                            document.getElementById("newPwSecond").focus();
+                        }
+                        if (event.keyCode === 27) {
+                            hide('PwChgFrm-modal-overlay')
+                            hide('PwChgFrm');
+                        }
+                    });
+                    var newPwSecond = document.getElementById("newPwSecond");
+                    newPwSecond.classList.remove('input-error');
+                    newPwSecond.classList.remove('input-good');
+                    newPwSecond.addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (testPasswordValid(newPwSecond.value)) {
+                            if (newPwFirst.value == newPwSecond.value) {
+                                document.getElementById("pwMatchError").style.display = 'none';
+                                newPwSecond.classList.add('input-good');
+                                newPwSecond.classList.remove('input-error');
+                            }
+                        } else {
+                            document.getElementById("pwMatchError").style.display = 'block';
+                            newPwSecond.classList.add('input-error');
+                            newPwSecond.classList.remove('input-good');
+                        }
+                        if ((event.keyCode === 13) && (newPwSecond.value !== '') && (testPasswordValid(newPwFirst.value)) && (newPwFirst.value == newPwSecond.value)) {
+                            document.getElementById("changePWSubmitBtn").click();
+                        }
+                        if (event.keyCode === 27) {
+                            hide('PwChgFrm-modal-overlay')
+                            hide('PwChgFrm');
+                        }
+                    });
+                    break;
+                case 'NewActFrm':
+                    document.getElementById('newAccountEmail').value = '';
+                    var newAccountEmail = document.getElementById("newAccountEmail");
+                    newAccountEmail.classList.remove('input-good');
+                    newAccountEmail.classList.remove('input-error');
+                    document.getElementById("emailerror").style.display = 'none';
+                    newAccountEmail.focus();
+                    newAccountEmail.addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (!newAccountEmail.validity.valid) {
+                            document.getElementById("emailerror").style.display = 'block';
+                            newAccountEmail.classList.add('input-error');
+                            newAccountEmail.classList.remove('input-good');
+                        } else {
+                            document.getElementById("emailerror").style.display = 'none';
+                            newAccountEmail.classList.add('input-good');
+                            newAccountEmail.classList.remove('input-error');
+                        }
+                        if ((event.keyCode === 13) && (newAccountEmail.value.length !== 0)) {
+                            document.getElementById("regNewAcctBtn").click();
+                        }
+                        if (event.keyCode === 27) {
+                            hide('NewActFrm-modal-overlay');
+                            hide('NewActFrm');
+                        }
+                    });
+                    newAccountFrmMsg = document.getElementById('newAccountFrmMsg');
+                    newAcctMessage = "If you an existing " + gymName + " customer, please enter the email address on file for WebPoral access.";
+                    newAccountFrmMsg.innerHTML = newAcctMessage;
+                    break;
+                case 'PwRecoverFrm':
+                    var recoverEmailAdr = document.getElementById("recoverEmailAdr");
+                    recoverEmailAdr.classList.remove('input-good');
+                    recoverEmailAdr.classList.remove('input-error');
+
+                    recoverEmailAdr.focus();
+                    recoverEmailAdr.addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (!recoverEmailAdr.validity.valid) {
+                            document.getElementById("emailerror_rec").style.display = 'block';
+                            recoverEmailAdr.classList.add('input-error');
+                            recoverEmailAdr.classList.remove('input-good');
+                        } else {
+                            document.getElementById("emailerror_rec").style.display = 'none';
+                            recoverEmailAdr.classList.add('input-good');
+                            recoverEmailAdr.classList.remove('input-error');
+                        }
+                        if ((event.keyCode === 13) && (recoverEmailAdr.value !== '')) {
+                            document.getElementById("recoverEmailBtn").click();
+                        }
+                        if (event.keyCode === 27) {
+                            hide('PwRecoverFrm-modal-overlay');
+                            hide('PwRecoverFrm');
+                        }
+                    });
+                    break;
+                case 'EnrollConfFrm':
+                    var EnrollConfBtn = document.getElementById("EnrollConfBtn");
+                    EnrollConfBtn.focus();
+                    EnrollConfBtn.addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (event.keyCode === 27) {
+                            document.getElementById("EnrollHideBtn").click();
+                        }
+                    });
+
+                    show('sunDiv');
+                    show('monDiv');
+                    show('tueDiv');
+                    show('wedDiv');
+                    show('thuDiv');
+                    show('friDiv');
+                    show('satDiv');
+
+                    if (sunStartTime !== '') { document.getElementById("sunStartSpan").innerHTML = monStartTime; }
+                    else { hide('sunDiv') }
+                    if (monStartTime !== '') { document.getElementById("monStartSpan").innerHTML = monStartTime; }
+                    else { hide('monDiv') }
+                    if (tueStartTime !== '') { document.getElementById("tueStartSpan").innerHTML = tueStartTime; }
+                    else { hide('tueDiv') }
+                    if (wedStartTime !== '') { document.getElementById("wedStartSpan").innerHTML = wedStartTime; }
+                    else { hide('wedDiv') }
+                    if (thuStartTime !== '') { document.getElementById("thuStartSpan").innerHTML = thuStartTime; }
+                    else { hide('thuDiv') }
+                    if (friStartTime !== '') { document.getElementById("friStartSpan").innerHTML = friStartTime; }
+                    else { hide('friDiv') }
+                    if (satStartTime !== '') { document.getElementById("satStartSpan").innerHTML = satStartTime; }
+                    else { hide('satDiv') }
+
+                    document.getElementById('enrollConfDetailsDiv').innerHTML = "";
+                    document.getElementById('enrollConfDetailsDiv').insertAdjacentHTML('beforeEnd',
+                        "<h4> Are you sure you wish to enroll " + _selectedStudent_Name + "?</h4>" + "<p>Student ID: " + _selectedStudent_ID + "</p>" + "<p>Student Name: " + _selectedStudent_Name + "<p>Class ID: " + _selectedClass_ID + "</p>" + "<p>Class Name: " + _selectedClass_Name + "</p>" + "<p>Class Level: " + _selectedClass_Type + "</p>"+ "<p>Charge Interval: " + chargeInt + "</p>" + "<p>Cost Before Deductions: " + costBeforeDeductions + "</p>");
+                    break;
+                case 'makePaymentFrm':
+                        if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                        document.body.style ="cursor: wait";
+                        var dataOBJ = TestForERROR(serverMethods().aegBalDueTotal());
+                        document.body.style ="cursor: auto";
+                        var jsonStringDataRes = JSON.parse(dataOBJ);
+
+                    var jsonStringData = jsonStringDataRes["aaData"];
+                    var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+                    var col = [];
+                    for (var i = 0; i < jsonStringData.length; i++) {
+                        for (var key in jsonStringData[i]) {
+                            if (col.indexOf(key) === -1) {
+                                col.push(key);
+                            }
+                        }
+                    }
+                    var table = document.createElement("table");
+                    table.setAttribute("class", "table");
+                    table.setAttribute("id", "balDueAmountTable");
+                    table.setAttribute("style", "unset:all");
+                    // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+                    var tr = table.insertRow(-1); // TABLE ROW.
+                    for (var i = 0; i < result.length; i++) {
+                        var th = document.createElement("th"); // TABLE HEADER.
+                        th.innerHTML = result[i];
+                        tr.appendChild(th);
+                        if (result[i] == "TotalDue") { th.innerHTML = "Total Amount Due"; }
+                    }
+                    // ADD JSON DATA TO THE TABLE AS ROWS.
+                    for (var i = 0; i < jsonStringData.length; i++) {
+                        tr = table.insertRow(-1);
+                        for (var j = 0; j < col.length; j++) {
+                            var tabCell = tr.insertCell(-1);
+                            tabCell.innerHTML = jsonStringData[i][col[j]];
+                            if ((j == 0) && (tabCell.innerHTML == "")) {
+                                tabCell.innerHTML = "$0.00";
+                            }
+                            tabCell.setAttribute("style", "display: none;");
+                            //if (j == 0) {
+                            //    tabCell.innerHTML = tabCell.innerHTML + ".00";}
+                            //tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2);
+                        }
+
+                        var divContainer = document.getElementById('paymentDetailsDiv');
+                        divContainer.innerHTML = "";
+                        divContainer.appendChild(table);
+                    }
+                    document.getElementById('balDueAmountTable').insertRow(-1).insertCell(-1).innerHTML = "$" + (parseFloat(document.getElementById('balDueAmountTable').rows[1].cells[0].innerHTML)).toFixed(2);
+
+
+                    break;
+                case 'EnrollReqFrm':
+                    if (_selectedStudent_Name !== '') {
+                        document.getElementById('reqEnrollStudentName').value = _selectedStudent_Name;
+                    }
+                    //if ( parent_Name !== '') {
+                    //    document.getElementById('reqEnrollParentName').value = _selectedParent_Name;
+                    //}
+                    // if ( _selectedParent_email !== '') {
+                    //     document.getElementById('reqEnrollEmailAdr').value = _selectedParent_email;
+                    // }
+                    // if ( _selectedParentPhone !== '') {
+                    //     document.getElementById('reqEnrollPhone').value = _selectedParent_email;
+                    // }
+                    document.getElementById('enrollReqDetailsDiv').innerHTML = "";
+                    document.getElementById('enrollReqDetailsDiv').insertAdjacentHTML('beforeEnd',
+                        "<h4> Are you sure you wish to enroll " + _selectedStudent_Name + "?</h4>" + "<p>Student ID: " + _selectedStudent_ID + "</p>" + "<p>Student Name: " + _selectedStudent_Name + "<p>Class ID: " + _selectedClass_ID + "</p>" + "<p>Class Name: " + _selectedClass_Name + "</p>" + "<p>Class Level: " + _selectedClass_Type + "</p>");
+                    break;
+                case 'makeItemizedPaymentFrm':
+                    var my_table = $('#balDueTable').DataTable()
+                    my_table
+                        .page.len(-1) // set the length to -1
+                        .draw()
+
+                    paymentAmount.length = 0; //clear
+                    paymentItems.length = 0;  //clear
+                    paySum = 0.00;
+
+                    var j = 0;
+                    var balDueTable = document.getElementById("balDueTable");
+                    for (var i = 1; i < balDueTable.rows.length; i++) {
+                        if (document.getElementById("paySelect" + (i - 1)).checked == true) {
+                            //console.log("paySelect" + (i - 1));
+                            var thisrow = document.getElementById("paySelectRow" + (i - 1));
+                            //console.log(thisrow.id);
+                            //paymentAmount.push(balDueTable.rows[i].cells[6].innerHTML);
+                            paymentAmount.push(thisrow.cells[6].innerHTML);
+                            paymentItems[j++] = {
+                                Date: thisrow.cells[1].innerHTML,
+                                Category: thisrow.cells[2].innerHTML,
+                                Comment: thisrow.cells[3].innerHTML,
+                                Amount: thisrow.cells[6].innerHTML.slice(1),
+                                Charge_ID: thisrow.cells[7].innerHTML,
+                                Trans_ID: thisrow.cells[8].innerHTML,
+                            }
+                        }
+                    }
+                    for (var i = 0; i < paymentAmount.length; i++) {
+                        paymentAmount[i] = parseFloat(paymentAmount[i].slice(1));
+                        paySum = paymentAmount[i] + paySum;
+                    }
+                    //console.log(paymentAmount);
+                    //console.log(paymentItems); //will be passed to server. contains Amount: , Charge_ID, Trans_ID of each item user selects
+                    var payItDiv = document.getElementById("paymentItemizedDetailsDiv");
+                    var payItDiv2 = document.getElementById("paymentItemizedDetailsDiv2");
+
+                    payItDiv.innerHTML = ''; // force empty
+                    payItDiv2.innerHTML = '';
+
+                    payItDiv.insertAdjacentHTML('beforeEnd', '<p>' + 'Payment Total:  ' + paySum.toFixed(2) + '</p>' + '<br><p> Items being paid: </p>');
+
+                    var col = [];
+                    for (var i = 0; i < paymentItems.length; i++) {
+                        for (var key in paymentItems[i]) {
+                            if (col.indexOf(key) === -1) {
+                                col.push(key);
+                            }
+                        }
+                    }
+                    var table = document.createElement("table");
+                    table.setAttribute("class", "table");
+                    table.setAttribute("class", "display");
+                    table.setAttribute("class", "cell-border");
+                    table.setAttribute("class", "compact");
+                    table.setAttribute("id", "payItTable");
+
+                    var header = table.createTHead();
+                    var tr = header.insertRow(-1); // TABLE ROW.
+                    headerNames = ['Date', 'Category', 'Comment', 'Amount', 'Charge_ID', 'Trans_ID'];
+                    for (var i = 0; i < headerNames.length; i++) {
+                        var th = document.createElement("th"); // TABLE HEADER.
+                        th.innerHTML = headerNames[i];
+                        th.setAttribute("style", "text-align:center");
+                        tr.appendChild(th);
+                    }
+                    var body = table.createTBody();
+                    for (var i = 0; i < paymentItems.length; i++) {
+                        tr = body.insertRow(-1);
+                        tr.setAttribute("style", "text-align:center");
+
+                        for (var j = 0; j < col.length; j++) {
+                            var tabCell = tr.insertCell(-1);
+                            tabCell.innerHTML = paymentItems[i][col[j]];
+                        }
+                        payItDiv2.innerHTML = "";
+                        payItDiv2.appendChild(table);
+                    }
+                    break;
+                case 'AddStudentFrm':
+                    document.getElementById("add_First_Name").focus();
+                    var add_First_Name = document.getElementById("add_First_Name");
+                    add_First_Name.value = '';
+                    add_First_Name.classList.remove('input-error');
+                    add_First_Name.classList.remove('input-good');
+                    document.getElementById('datepicker').value = '';
+                    document.getElementById("fNameError").style.display = 'none';
+                    document.getElementById("lNameError").style.display = 'none';
+                    add_First_Name.addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (testNameValid(add_First_Name.value)) {
+                            document.getElementById("fNameError").style.display = 'none';
+                            add_First_Name.classList.add('input-good');
+                            add_First_Name.classList.remove('input-error');
+                        } else {
+                            document.getElementById("fNameError").style.display = 'block';
+                            add_First_Name.classList.add('input-error');
+                            add_First_Name.classList.remove('input-good');
+                        };
+                        if ((event.keyCode === 13) && (add_First_Name.value !== '') && (testNameValid(add_First_Name.value))) {
+                            document.getElementById("add_Last_Name").focus();
+                        }
+                        if (event.keyCode === 27) {
+                            hide('AddStudentFrm-modal-overlay')
+                            hide('PwChgAddStudentFrmFrm');
+                        }
+                    });
+                    var add_Last_Name = document.getElementById("add_Last_Name");
+                    add_Last_Name.value = '';
+                    add_Last_Name.classList.remove('input-error');
+                    add_Last_Name.classList.remove('input-good');
+                    add_Last_Name.addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (testNameValid(add_Last_Name.value)) {
+                            document.getElementById("lNameError").style.display = 'none';
+                            add_Last_Name.classList.add('input-good');
+                            add_Last_Name.classList.remove('input-error');
+                        } else {
+                            document.getElementById("lNameError").style.display = 'block';
+                            add_Last_Name.classList.add('input-error');
+                            add_Last_Name.classList.remove('input-good');
+                        }
+                        if ((event.keyCode === 13) && (testNameValid(add_First_Name.value)) && (testNameValid(add_Last_Name.value))) {
+                            document.getElementById("addStudentBtn").click();
+                        }
+                        if (event.keyCode === 27) {
+                            hide('AddStudentFrm-modal-overlay')
+                            hide('AddStudentFrm');
+                        }
+                    });
+                    break;
+                default:break;
+            }
+        }
+        function hide(id) { // Hide Element. Expctd: html ID
+            document.getElementById(id).style.display = 'none';
+            if (id.indexOf("modal-overlay") >= 0) {
+                $(function () {
+                    $('body').removeClass('no-scroll');
+                });
+            }
+        }
+        function printData(x){ //printData('x');  'x' is the name of the element that you wish to print.
+            var titleDiv = document.getElementById('mainTitleBar');
+            var addressDiv = document.getElementById('mainTitleBarAddress');
+            var divToPrint = document.getElementById(x);
+            newWin = window.open("");
+            newWin.document.write(titleDiv.outerHTML +  addressDiv.outerHTML + divToPrint.outerHTML);
+            newWin.print();
+            newWin.close();
+            }
+        function sendEmail(x) { //email templates. Opens a new mailto: within browser. Depends on the user having mailto: properly set up within browser
+            var emailAddress = document.getElementById('gymEmail').innerText;
+            var storedGUID = fetchCookie('guid');
+            if (document.getElementById("FIParentName").innerHTML == "John Smith") {
+                var reqEnrollParentName = "",
+                    reqEnrollPhone = "",
+                    reqEnrollEmailAdr = "";
+            } else {
+                var reqEnrollParentName = document.getElementById("FIParentName").innerHTML,
+                    reqEnrollPhone = document.getElementById("FIPhone").innerHTML,
+                    reqEnrollEmailAdr = document.getElementById("FIEmail").innerHTML;
+            }
+
+            showError("Sending E-mail To " + emailAddress );
+            switch (x){
+                case '':
+                    window.location = 'mailto:' + emailAddress + '?subject=Proschool3%20Web%20Portal%20Correspondence%20' + _selectedStudent_ID + '&body=' +
+                        "%0A%0A%0A%0A%0A%0A%0A%0A###############%0A" +
+                        "%0AStudent%20ID:%20" + _selectedStudent_ID +
+                        "%0AStudent%20Name:%20" + _selectedStudent_Name +
+                        "%0AStudent%20Age:%20" + _selectedStudent_Age +
+                        "%0AParent%20Name:%20" + reqEnrollParentName +
+                        "%0AParent%20Phone:%20" + reqEnrollPhone +
+                        "%0AParent%20Email:%20" + reqEnrollEmailAdr +
+                        "%0AClass:%20" + _selectedClass_ID +
+                        "%0AClass%20Type:%20" + _selectedClass_Type +
+                        "%0ATuition%20Code:%20" + _selectedTuition_Code +
+                        "%0ATeacher%20Code:%20" + _selectedStudent_Age;
+                    break;
+
+                case 'enroll':
+                    var emailBodyDefault = 'I am interested in enrolling my student in the class listed. Please contact me.';
+                    window.location = 'mailto:' + emailAddress + '?subject=Proschool3%20Web%20Portal%20Correspondence%20RE:%20Enroll%20New%20Class%20' + _selectedStudent_ID + '&body=' + emailBodyDefault + "%0A%0A%0A%0A%0A%0A%0A%0A###############%0A" +
+                        "%0AStudent%20ID:%20" + _selectedStudent_ID +
+                        "%0AStudent%20Name:%20" + _selectedStudent_Name +
+                        "%0AStudent%20Age:%20" + _selectedStudent_Age +
+                        "%0AParent%20Name:%20" + reqEnrollParentName +
+                        "%0AParent%20Phone:%20" + reqEnrollPhone +
+                        "%0AParent%20Email:%20" + reqEnrollEmailAdr +
+                        "%0AClass:%20" + _selectedClass_ID +
+                        "%0AClass%20Type:%20" + _selectedClass_Type +
+                        "%0ATuition%20Code:%20" + _selectedTuition_Code +
+                        "%0ATeacher%20Code:%20" + _selectedStudent_Age;
+                    break;
+                case 'recover':
+                    var emailBodyDefault = 'I need assistance with my ProSchool Login or Password. Please contact me.';
+                    window.location = 'mailto:' + emailAddress + '?subject=Proschool3%20Web%20Portal%20Correspondence%20RE:%20Recover%20Password%20&body=' + emailBodyDefault + "%0A%0A%0A%0A##########";
+                    break;
+
+                case 'new':
+                    var emailBodyDefault = 'I need assistance with attaching a new E-mail address to my ProSchool account. Please contact me.';
+                    window.location = 'mailto:' + emailAddress + '?subject=Proschool3%20Web%20Portal%20Correspondence%20RE:%20Attach%20New%20Email%20%20Existing%20Account%20Password%20' + _selectedStudent_ID + '&body=' + emailBodyDefault +
+                        "%0A%0A%0A%0A%0A%0A%0A%0A###############%0A";
+                    break;
+
+                case 'AddStudent':
+                    var emailBodyDefault = 'I need assistance with attaching a new student to my existing ProSchool account. Please contact me.';
+                    window.location = 'mailto:' + emailAddress + '?subject=Proschool3%20Web%20Portal%20Correspondence%20' + _selectedStudent_ID + '&body=' + emailBodyDefault
+                        "%0A%0A%0A%0A%0A%0A%0A%0A###############%0A" +
+                        "%0AStudent%20ID:%20" + _selectedStudent_ID +
+                        "%0AStudent%20Name:%20" + _selectedStudent_Name +
+                        "%0AStudent%20Age:%20" + _selectedStudent_Age +
+                        "%0AParent%20Name:%20" + reqEnrollParentName +
+                        "%0AParent%20Phone:%20" + reqEnrollPhone +
+                        "%0AParent%20Email:%20" + reqEnrollEmailAdr +
+                        "%0AClass:%20" + _selectedClass_ID +
+                        "%0AClass%20Type:%20" + _selectedClass_Type +
+                        "%0ATuition%20Code:%20" + _selectedTuition_Code +
+                        "%0ATeacher%20Code:%20" + _selectedStudent_Age;
+                    break;
+
+                case 'requestEnroll':
+                    //  reqEnrollPhone  reqEnrollEmailAdr
+                    var reqEnrollName = document.getElementById('reqEnrollFirstName'),
+                        reqEnrollPhone = document.getElementById('reqEnrollFirstName'),
+                        reqEnrollEmailAdr = document.getElementById('reqEnrollEmailAdr');
+                    var emailBodyDefault = 'I am interested in enrolling my student in the class listed. Please contact me.';
+                    var internalEmailNotes = 'Internal Notes: '
+                    window.location = 'mailto:' + emailAddress + '?subject=Proschool3%20Web%20Portal%20Correspondence%20RE:%20Request%20New%20Enroll%20' + _selectedStudent_ID + '&body=' + emailBodyDefault + "%0A%0A%0A%0A%0A%0A%0A%0A###############%0A" +
+                        internalEmailNotes +
+                        "%0AStudent%20ID:%20" + _selectedStudent_ID +
+                        "%0AStudent%20Name:%20" + reqEnrollName +
+                        "%0AStudent%20Age:%20" + _selectedStudent_Age +
+                        "%0AParent%20Name:%20" + reqEnrollParentName +
+                        "%0AParent%20Phone:%20" + reqEnrollPhone +
+                        "%0AParent%20Email:%20" + reqEnrollEmailAdr +
+                        "%0AClass:%20" + _selectedClass_ID +
+                        "%0AClass%20Type:%20" + _selectedClass_Type +
+                        "%0ATuition%20Code:%20" + _selectedTuition_Code +
+                        "%0ATeacher%20Code:%20" + _selectedStudent_Age;
+                    break;
+
+                case 'makePayment':
+                    var emailBodyDefault = 'I have questions or need assistance with making a payment on my ProSchool account. Please contact me.'
+                    window.location = 'mailto:' + emailAddress + '?subject=Proschool3%20Web%20Portal%20Correspondence%20RE:%20Make%20A%20Payment%20' + _selectedStudent_ID + '&body=' + emailBodyDefault + '%0A%0A%0A%0A%0A%0A%0A%0A###############%0A' //+
+                    //"%0AStudent%20ID:%20" + _selectedStudent_ID +
+                    //"%0AStudent%20Name:%20" + _selectedStudent_Name;
+                    // todo: Add parent info, remove student info, add payment info?
+                    break;
+                case 'makeItemizedPayment':
+                    var paidItemsMsg = '%0A' + 'Payment Total:%20%20' + paySum.toFixed(2) + '%0A%0AItems being paid:';
+                    var payMessage = [];
+                    for (var i = 0; i < paymentItems.length; i++) {
+                        payMessage.push(
+                            '%0A' +
+                            '%20%20Date:%20' + paymentItems[i]["Date"] +
+                            '%0A' +
+                            '%20%20Amount:%20' + paymentItems[i]["Amount"] +
+                            '%0A' +
+                            '%20%20Category:%20' + paymentItems[i]["Category"] +
+                            '%0A' +
+                            '%20%20Comment:%20' + paymentItems[i]["Comment"] +
+                            '%0A' +
+                            '%20%20Charge_ID:%20' + paymentItems[i]["Charge_ID"] +
+                            '%0A%0A');
+                            var emailBodyDefault = 'I have questions or need assistance with making an itemized payment on my ProSchool account. Please contact me.'
+                            window.location = 'mailto:' + emailAddress + '?subject=Proschool3%20Web%20Portal%20Correspondence%20RE:%20Make%20A%20Payment%20' + _selectedStudent_ID + '&body=' + emailBodyDefault + '%0A%0A%0A%0A%0A%0A%0A%0A###############%0A' +
+                                paidItemsMsg +
+                                payMessage;
+                            //"%0AStudent%20ID:%20" + _selectedStudent_ID +
+                            //"%0AStudent%20Name:%20" + _selectedStudent_Name;
+                            // todo: Add parent info, remove student info, add payment info?
+                    }
+                    break;
+                default:;
+            }
+        }
+
+        var loginRequired = false;
+        function onLoad() { //main onLoad event. Called on page load.
+        //    <!-- startupCookieAMR(); -->  <!-- Deletes related "dssessionid" session cookie, without this 1st call we can get an 403 Session Invalid on the 1st aegXX call -->
+        //    <!-- NEW RULE: NEVER CALL serverMethods(). BEFOR LOGIN IS SUCESSFUL AND WE GET A VALID SessionID ELSE BREAK THE $$SSessionID$$ glogal processing in the framework -->
+        //    <!-- addSelectClassLvl(); --> <!-- Here we are calling aegXX methods before login so we need to force that Delete of "dssessionid" above else this will 403 ERROR -->
+        //    <!-- addSelectClassType(); -->
+        //    <!-- updateAddressBar(); -->
+            document.getElementById("dowSearchTable").addEventListener("click", searchDoWTblOnClick(this));
+            initSessionData(true); //<!-- Call this in production code -- Force JavaScript to add this session ID to a browser cookie. -->
+            // !-- loginRequired = <#loginRequired>;  <!-- Used to add in debugging, comment out for production/release code -->
+            loginRequired = (getSessionID() == null); //<!-- Used in production code, check if client app doesn't have a vlid session ID, also checks expired -->
+
+            setConnection('<#host>', '<#port>', '<#urlpath>');
+
+
+            $(function () {   //Date select in New Student Modal. Requires jquery
+                $("#datepicker").datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "2000:2020"
+
+                });
+            });  //end Date Select
+
+            clientDisabledCheck();
+
+            if (loginRequired) {
+                showLogin(true);
+            } else {
+                showLogin(false);
+            }
+            document.getElementById("userField").focus();
+
+            var userField = document.getElementById("userField");
+            userField.addEventListener("keyup", function (event) {
+                event.preventDefault();
+                if ((event.keyCode === 13) && (userField.value !== '')) {
+                    document.getElementById("passwrdField").focus();
+                }
+            });
+            var passwrdField = document.getElementById("passwrdField");
+            passwrdField.addEventListener("keyup", function (event) {
+                event.preventDefault();
+                if ((event.keyCode === 13) && (passwrdField.value !== '')) {
+                    document.getElementById("loginButton").click();
+                }
+            });
+        }
+
+        function onLogin() {
+            if (loginRequired) {
+                if (AdminInst == null) {
+                    if ((!document.getElementById('userField').value == '') && (!document.getElementById('passwrdField').value == '')) {
+                        var URL = location.href.substring(location.href.lastIndexOf("/") + 6, location.href.length);
+                        var suserField = document.getElementById('userField').value + '_' + URL;
+                        if (!setCredentials(suserField, document.getElementById('passwrdField').value)) {
+                            loginCorrect(false);
+                            return;
+                        } else {
+                            loginCorrect(true);
+                            showLogin(false);
+                            // var URL = location.href.substring(location.href.lastIndexOf("/") + 6, location.href.length);
+                            var rURL = serverMethods().SetGUIDSessionID(URL);
+                            //alert(URL,rURL); //debug only
+                            saveGUID(URL);
+                        }
+                    } else { loginCorrect(false); }
+                }
+            } else
+                showLogin(false);
+        }
+
+        function loginCorrect(isCorrect) {
+            var errorDiv = document.getElementById('loginError');
+            if (errorDiv != null) {
+                errorDiv.innerHTML = isCorrect ? "" : "Invalid Login";
+                //var hCodedRecoverBtn = '<p><a class="cp moble-label full-width" style="color:#2196F3; font-weight: bold;font-shadow: white" onclick="show(&apos;PwRecoverFrm&apos;);">Forgot Password?</a></p>';
+                //errorDiv.insertAdjacentHTML('beforeEnd', hCodedRecoverBtn);
+            }
+            //forgot password? Prompt here if you want it to show after failed password
+
+            //var hCodedRecoverBtn = '<p><a class="cp moble-label full-width" style="color:#2196F3; font-weight: bold;font-shadow: white" onclick="show(&apos;PwRecoverFrm&apos;);">Forgot Password?</a></p>';
+            //errorDiv.insertAdjacentHTML('beforeEnd', hCodedRecoverBtn);
+        }
+        function showLogin(showui) {
+            if (showui) {
+            } else { //not secure, UI only
+                //user logged in: Main event displaying UI elements upon login.
+                hide('classSchedulePreLoginRendered');
+                getFamilyInfo();
+                //getAutoPayInfo();
+                show('familyInfo');
+                if (document.getElementById('FICardAddress').innerText != '111 Placeholder St.') {show('paymentInfo');}
+                show('classSchedule');
+                show('ClassSearch');
+                addSelectClassLvl();
+                addSelectClassType();
+                hide('Nav0'); //LOGIN nav btn:
+                show('Nav1'); //MY STUDENTS
+                show('Nav2'); //SEARCH
+                hide('NavPreLoginSearch');// prelogin SEARCH
+                show('Nav3');// PAYMENTS
+                show('Nav4');// CHANGE PASSWORD
+                show('Nav5'); // LOGOUT
+                getStudents();
+
+                //show('chargesDiv');
+                //getBalDue();
+                //show('paymentsDiv');
+                //getPayments();
+                // show('chgPwDiv');
+                //show('logoutDiv');
+                hide('login');
+                //hide('gymVideo');
+                var errorDiv = document.getElementById('loginError');
+                errorDiv.innerHTML = "login correct";
+            }
+        }
+        function serverMethods() { //required framework for implementing serverMethods();
+            return new <#classname > (connectionInfo);
+        }
+        function topFunction() { //Calling returns the user to top of page.
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+        function SubmitRequestToServer() {  //Search Classes Event.
+            var studentAge = document.getElementById('Student_Age'),
+                gender = document.getElementById('Gender'),
+                level = document.getElementById('Level'),
+                classType = document.getElementById('ClassType');
+            var clusive = true;
+            if (document.getElementById("inclusive").checked == true) {
+                clusive = true;
+            } else clusive = false;
+
+            var daysoftheweek = ["SearchSun", "SearchMon", "SearchTue", "SearchWed", "SearchThu", "SearchFri", "SearchSat"],
+                daysofweekBoolValues = [{ sun: false }, { mon: false }, { tue: false }, { wed: false }, { thr: false }, { fri: false }, { sat: false }];
+            for (var i = 0; i < 7; i++) {
+                if (document.getElementById("dowSearchTable").rows[0].cells.namedItem(daysoftheweek[i]).style.fontWeight == "100") {
+                    daysofweekBoolValues[i] = false;
+                } else {
+                    daysofweekBoolValues[i] = true;
+                }
+            };
+            SearchResultsTableConstructor(); //Populates Table for Class Search Results
+            function SearchResultsTableConstructor() {
+                //var aclassTime = '1234.01'; // string in Float format for now
+                    var aclassTime = document.getElementById('classTime');
+                    if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                    var dataOBJ = TestForERROR(serverMethods().SearchClassQuery(_selectedStudent_ID, aclassTime.value, studentAge.value, gender.value, level.value, classType.value, daysofweekBoolValues[0], daysofweekBoolValues[1], daysofweekBoolValues[2], daysofweekBoolValues[3], daysofweekBoolValues[4], daysofweekBoolValues[5], daysofweekBoolValues[6], clusive));
+                    var jsonStringDataRes = JSON.parse(dataOBJ);
+
+                var jsonStringData = jsonStringDataRes["aaData"];
+                var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+                var col = [];
+                for (var i = 0; i < jsonStringData.length; i++) {
+                    for (var key in jsonStringData[i]) {
+                        if (col.indexOf(key) === -1) {
+                            col.push(key);
+                        }
+                    }
+                }
+                var table = document.createElement("table");
+                table.setAttribute("class", "table");
+                // table.setAttribute("style","all:unset");
+                table.setAttribute("class", "display");
+                table.setAttribute("class", "cell-border");
+                table.setAttribute("class", "compact");
+                table.setAttribute("class", "hover")
+                // table.setAttribute("style","width:100%");
+                table.setAttribute("id", "searchResultsTable2");
+
+                // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+                var header = table.createTHead();
+                var tr = header.insertRow(-1); // TABLE ROW.
+                //tr.insertCell(-1); // for testing
+                for (var i = 0; i < result.length; i++) {
+                    var th = document.createElement("th"); // TABLE HEADER.
+                    th.innerHTML = result[i];
+                    if (result[i] == "Portal_Enrollable") { th.innerHTML = ""; }
+                    if (result[i] == "name") { th.innerHTML = "Class Name"; }
+                    if (result[i] == "type") { th.innerHTML = "Class Type"; }
+                    if (result[i] == "Description") { th.innerHTML = "Class Level"; }
+                    if (result[i] == "sunday") { th.innerHTML = "Sun"; }
+                    if (result[i] == "monday") { th.innerHTML = "Mon"; }
+                    if (result[i] == "tuesday") { th.innerHTML = "Tue"; }
+                    if (result[i] == "wednesday") { th.innerHTML = "Wed"; }
+                    if (result[i] == "thursday") { th.innerHTML = "Thur"; }
+                    if (result[i] == "friday") { th.innerHTML = "Fri"; }
+                    if (result[i] == "saturday") { th.innerHTML = "Sat"; }
+                    if (result[i] == "Type") { th.innerHTML = "Charge Interval"; }
+                    if (result[i] == "Similar1") { th.innerHTML = "Cost Before Deductions"; }
+
+                    th.setAttribute("style", "text-align:center");
+                    tr.appendChild(th);
+                }
+
+                // ADD JSON DATA TO THE TABLE AS ROWS.
+                var body = table.createTBody();
+                for (var i = 0; i < jsonStringData.length; i++) {
+                    tr = body.insertRow(-1);
+                   // tr.insertCell(-1); // for testing
+                    tr.setAttribute("style", "text-align:center");
+
+                    for (var j = 0; j < col.length; j++) {
+                        var tabCell = tr.insertCell(-1);
+                        tabCell.innerHTML = jsonStringData[i][col[j]];
+                        //tr.setAttribute("class", "cp");
+
+                        // if can enroll:
+                        //   0= all disabled, 1=Enroll Now only, 2=Call To Enroll only, 3= Enroll Now & Call To Enroll,  4 = Class Full only.
+                        // todo: going to change this to a bool instead of int flag ie. true =
+                        if ((tabCell.innerHTML == "True") && (j == 0)) {
+                            tr.setAttribute("onClick", "classClickToEnroll(this)");
+                            tr.setAttribute("class", "cp");
+                            tabCell.innerHTML = "<button class='btn-enrollNow cp' style='padding: 8px 16px;'><i class='far fa-check-circle'></i>&nbsp;Enroll Now";
+
+                        } else if ((tabCell.innerHTML == "False") && (j == 0)) {
+                            tr.setAttribute("onClick", "showError('Please Call The Office To Enroll.')");
+                            tr.setAttribute("style", "cursor:not-allowed");
+                            tabCell.innerHTML = "<button class='btn-callToEnroll' style='cursor:not-allowed;padding: 8px 16px;' disabled><i class='fas fa-phone'></i>&nbsp;Call To Enroll";
+                        } else if ((tabCell.innerHTML == "4") && (j == 0)) {
+                            tr.setAttribute("onClick", "showError('Sorry, This Class Is Full.')");
+                            tr.setAttribute("style", "cursor:not-allowed");
+                            tabCell.innerHTML = "<button class='btn-disabledEnroll' style='cursor:not-allowed;padding: 8px 16px;'disabled><i class='far fa-times-circle'></i>&nbsp;Class Full";
+                        }
+                        //True
+                        if ((tabCell.innerHTML == "True") && (j == 7)) {
+                            tabCell.style = "font-weight: 900;";
+                            tabCell.innerHTML = "S";
+                        } else if ((tabCell.innerHTML == "True") && (j == 8)) {
+                            tabCell.style = "font-weight: 900;";
+                            tabCell.innerHTML = "M";
+                        } else if ((tabCell.innerHTML == "True") && (j == 9)) {
+                            tabCell.style = "font-weight: 900;";
+                            tabCell.innerHTML = "T";
+                        } else if ((tabCell.innerHTML == "True") && (j == 10)) {
+                            tabCell.style = "font-weight: 900;";
+                            tabCell.innerHTML = "W";
+                        } else if ((tabCell.innerHTML == "True") && (j == 11)) {
+                            tabCell.style = "font-weight: 900;";
+                            tabCell.innerHTML = "Th";
+                        } else if ((tabCell.innerHTML == "True") && (j == 12)) {
+                            tabCell.style = "font-weight: 900;";
+                            tabCell.innerHTML = "F";
+                        } else if ((tabCell.innerHTML == "True") && (j == 13)) {
+                            tabCell.style = "font-weight: 900;";
+                            tabCell.innerHTML = "S";
+                            //false
+                        } else if ((tabCell.innerHTML == "False") && (j == 7)) {
+                            tabCell.style = "font-weight: 100;color:#888;";
+                            tabCell.innerHTML = "S";
+                        } else if ((tabCell.innerHTML == "False") && (j == 8)) {
+                            tabCell.style = "font-weight: 100;color:#888;";
+                            tabCell.innerHTML = "M";
+                        } else if ((tabCell.innerHTML == "False") && (j == 9)) {
+                            tabCell.style = "font-weight: 100;color:#888;";
+                            tabCell.innerHTML = "T";
+                        } else if ((tabCell.innerHTML == "False") && (j == 10)) {
+                            tabCell.style = "font-weight: 100;color:#888;";
+                            tabCell.innerHTML = "W";
+                        } else if ((tabCell.innerHTML == "False") && (j == 11)) {
+                            tabCell.style = "font-weight: 100;color:#888;";
+                            tabCell.innerHTML = "Th";
+                        } else if ((tabCell.innerHTML == "False") && (j == 12)) {
+                            tabCell.style = "font-weight: 100;color:#888;";
+                            tabCell.innerHTML = "F";
+                        } else if ((tabCell.innerHTML == "False") && (j == 13)) {
+                            tabCell.style = "font-weight: 100;color:#888;";
+                            tabCell.innerHTML = "S";
+                        } else if ((j >= 13) && (j < 21)) {
+                            if (tabCell.innerHTML.length == 21) {
+                                tabCell.innerHTML = tabCell.innerHTML.slice(11);
+                                tabCell.innerHTML = tabCell.innerHTML.slice(0, 4) + '&nbsp;' + tabCell.innerHTML.slice(8);
+                                tr.cells[(j - 7)].insertAdjacentHTML('beforeEnd', "<div style='font-weight:100;'>" + tabCell.innerHTML + "</div");
+                                //  working tr.cells[(j - 7)].innerHTML = tr.cells[(j - 7)].innerHTML + tr.cells[j].innerHTML;
+                            } else if (tabCell.innerHTML.length == 22) {
+                                tabCell.innerHTML = tabCell.innerHTML.slice(11);
+                                tabCell.innerHTML = tabCell.innerHTML.slice(0, 5) + '&nbsp;' + tabCell.innerHTML.slice(9);
+                                tr.cells[(j - 7)].insertAdjacentHTML('beforeEnd', "<div style='font-weight:100;'>" + tabCell.innerHTML + "</div");
+                            }
+                        } else if (j == 21) {
+                            if (tabCell.innerHTML == "M") {tabCell.innerText = "Per Month"};
+                            if (tabCell.innerHTML == "S") {tabCell.innerHTML = "Per Session"};
+                            if (tabCell.innerHTML == "H") {tabCell.innerHTML = "Per Hour"};
+
+                        } else if (j == 22) {
+                            tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2);
+                        } else { }
+
+                        //testing only, this row will contain actual data on live
+                        //
+                        //                         for (var n = 0; n < 3; n++)
+                        //                                 if (j == 20) {var x = tr.insertCell(-1);
+                        //                                     if (n == 0) {x.innerHTML = "<button class='btn-enrollNow cp' style='padding: 8px 16px;'><i class='far fa-check-circle'></i>&nbsp;Enroll Now";}
+                        //                                     if (n == 1) {x.innerHTML = "<button class='btn-callToEnroll' style='padding: 8px 16px;' onclick='show(EnrollReqFrm);'><i class='fas fa-phone'></i>&nbsp;Request Enrollment";}
+                        //                                     //    if (n == 1) {x.innerHTML = "<button class='btn-callToEnroll' style='cursor:not-allowed;padding: 8px 16px;' disabled><i class='fas fa-phone'></i>&nbsp;Call To Enroll";}
+                        //                                     if (n == 2) {x.innerHTML = "<button class='btn-disabledEnroll' style='cursor:not-allowed;padding: 8px 16px;'disabled><i class='far fa-times-circle'></i>&nbsp;Class Full";}
+                        //                                 }
+                        //
+
+                    }
+                }
+                var divContainer = document.getElementById('searchResultsTable2div');
+                divContainer.innerHTML = "";
+                divContainer.appendChild(table);
+                $('#searchResultsTable2').DataTable({ //populates searchResultsTable2 HTML Div with the results provided above. Formatting table params below. https://datatables.net/reference/index
+                    "pagingType": "full_numbers",
+                    "order": [[2, "desc"]],
+                    "autoWidth": true,
+                    "processing": true,
+                    //sDom: "<'top'ilf>rt<'bottom'p><'clear'>",
+                    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                });
+                // $('#searchResultsTable2').DataTable({"pagingType": "first_last_numbers","scrollX": true});
+
+            }
+        document.getElementById("searchResultsTable2_wrapper").scrollIntoView();
+        }
+        var sunStartTime = "", monStartTime = "", tueStartTime = "", wedStartTime = "", thuStartTime = "", friStartTime = "", satStartTime = ""; chargeInt = "";costBeforeDeductions = "";
+        function classClickToEnroll(X) {
+            if (document.getElementById('classSchedule').style.display === 'none') {
+                showError("You Must Log In To Enroll!");
+            } else {
+                if (typeof X.cells[1] !== "undefined") {
+                    _selectedClass_ID = X.cells[1].innerHTML;
+                }
+                if (typeof X.cells[1] !== "undefined") {
+                    _selectedClass_Code = X.cells[1].innerHTML;
+                }
+                if (typeof X.cells[2] !== "undefined") {
+                    _selectedClass_Name = X.cells[2].innerHTML;
+                }
+                if (typeof X.cells[3] !== "undefined") {
+                    _selectedClass_Type = X.cells[3].innerHTML;
+                }
+                if (typeof X.cells[4] !== "undefined") {
+                    _selectedTeacher_Code = X.cells[4].innerHTML;
+                }
+                if (typeof X.cells[6] !== "undefined") {
+                    _selectedTuition_Code = X.cells[6].innerHTML;
+                }
+                if (typeof X.cells[14] !== "undefined") {
+                    sunStartTime = X.cells[14].innerHTML;
+                }
+                if (typeof X.cells[15] !== "undefined") {
+                    monStartTime = X.cells[15].innerHTML;
+                }
+                if (typeof X.cells[16] !== "undefined") {
+                    tueStartTime = X.cells[16].innerHTML;
+                }
+                if (typeof X.cells[17] !== "undefined") {
+                    wedStartTime = X.cells[17].innerHTML;
+                }
+                if (typeof X.cells[18] !== "undefined") {
+                    thuStartTime = X.cells[18].innerHTML;
+                }
+                if (typeof X.cells[19] !== "undefined") {
+                    friStartTime = X.cells[19].innerHTML;
+                }
+                if (typeof X.cells[20] !== "undefined") {
+                    satStartTime = X.cells[20].innerHTML;
+                }
+                if (typeof X.cells[21] !== "undefined") {
+                    chargeInt = X.cells[21].innerHTML;
+                }
+                if (typeof X.cells[22] !== "undefined") {
+                    costBeforeDeductions = X.cells[22].innerHTML;
+                }
+                show('EnrollConfFrm-modal-overlay');
+                show("EnrollConfFrm");
+            }
+        }
+        function searchDoWTblOnClick(x) {
+            var table = document.getElementById("dowSearchTable");
+            if (table != null) {
+                for (var i = 0; i < table.rows.length; i++) {
+                    for (var j = 0; j < table.rows[i].cells.length; j++)
+                        table.rows[i].cells[j].onclick = function () {
+                            tableHighlight(this);
+                        };
+                }
+            }
+            function tableHighlight(tableCell) {
+                if (tableCell.style.fontWeight == "100") {
+                    tableCell.style = "font-weight: 900;cursor: pointer;";
+                } else {
+                    tableCell.style = "font-weight: 100;color:#888;";
+                }
+            }
+        }
+        function tblOnClick(x) {
+            var studentsTable = document.getElementById('studentsTable').rows;
+            for (var i = 0; i < studentsTable.length; i++) {
+                if (studentsTable[i].classList.contains('highlighted')) { studentsTable[i].classList.remove('highlighted') };
+            }
+            if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+            document.body.style ="cursor: wait";
+            var studentDetail = TestForERROR(serverMethods().aegGetStudentsDetail(x.cells[0].innerHTML));
+            document.body.style ="cursor: auto";
+            _selectedStudent_ID = x.cells[0].innerHTML;
+            _selectedStudent_Name = x.cells[1].innerHTML + ' ' + x.cells[2].innerHTML;
+            showStudentsDetail(studentDetail);
+            x.classList.add('highlighted');
+        }
+        function showStudentsDetail(studentDetail) { //Populates Students Detail UI
+                var jsonStringDataRes = JSON.parse(studentDetail);
+            var jsonStringData = jsonStringDataRes["aaData"];
+            var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+            var col = [];
+            for (var i = 0; i < jsonStringData.length; i++) {
+                for (var key in jsonStringData[i]) {
+                    if (col.indexOf(key) === -1) {
+                        col.push(key);
+                    }
+                }
+            }
+            var table = document.createElement("table");
+            table.setAttribute("class", "table");
+            table.setAttribute("id", "studentsDetailTable");
+            table.setAttribute("style", "display:block"); //to make sure the table shows if going from an unenrolled student to an enrolled student
+
+            // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+            var tr = table.insertRow(-1); // TABLE ROW.
+            for (var i = 0; i < result.length; i++) {
+                var th = document.createElement("th"); // TABLE HEADER.
+                th.innerHTML = result[i]; //comment out this line in production to hide table headers, and uncomment following line
+                //th.setAttribute("style", "all:unset");
+                tr.appendChild(th);
+            }
+            // ADD JSON DATA TO THE TABLE AS ROWS.
+            for (var i = 0; i < jsonStringData.length; i++) {
+                tr = table.insertRow(-1);
+                for (var j = 0; j < col.length; j++) {
+                    var tableCell = tr.insertCell(-1);
+                    tableCell.innerHTML = jsonStringData[i][col[j]];
+                    //tr.setAttribute("onClick","tblOnClick(this)");
+                    //tr.setAttribute("style","");
+                }
+            }
+            var divContainer = document.getElementById('mystudentsdetail');
+            divContainer.innerHTML = "";
+            divContainer.appendChild(table);
+            document.getElementById('mystudentnamelabel').innerHTML = '<i class="far fa-address-card"></i> &nbsp;&nbsp;&nbsp;' + _selectedStudent_Name + '\'s Currently Enrolled Classes:'
+            document.getElementById('studentName').innerHTML = '<i class="fas fa-search"></i>&nbsp;&nbsp;&nbsp;Search For A Class Or Enroll ' + _selectedStudent_Name;
+
+            //check if student is enrolled
+            document.getElementById("studentsDetailTable").style = "width:100%";
+            if (typeof document.getElementById("studentsDetailTable").rows[1] == "undefined") {
+                document.getElementById("mystudentsdetail").insertAdjacentHTML('beforeend', '<p>Selected student not currently enrolled in any classes.</p>');
+                hide("studentsDetailTable");
+                document.getElementById("mystudentsdetail").setAttribute("style", "unset:box-shadow");
+                resetSearch();
+            } else {
+                document.getElementById("mystudentsdetail").setAttribute("style", "box-shadow: 0 8px 9px 0 #00000033, 0 6px 16px 0 #00000030");
+                studentAgeCalc();
+                genderUpdate();
+                //SubmitRequestToServer();
+            }
+        }
+        function getStudents() {  //Populates 'My Students' UI
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                document.body.style ="cursor: wait";
+                var dataOBJ = TestForERROR(serverMethods().aegGetMyStudents());
+                document.body.style ="cursor: auto";
+                var jsonStringDataRes = JSON.parse(dataOBJ);
+
+            var jsonStringData = jsonStringDataRes["aaData"];
+            var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+            var col = [];
+            for (var i = 0; i < jsonStringData.length; i++) {
+                for (var key in jsonStringData[i]) {
+                    if (col.indexOf(key) === -1) {
+                        col.push(key);
+                    }
+                }
+            }
+            var table = document.createElement("table");
+            table.setAttribute("class", "table");
+            table.setAttribute("id", "studentsTable");
+
+            // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+            var tr = table.insertRow(-1); // TABLE ROW.
+            for (var i = 0; i < result.length; i++) {
+                var th = document.createElement("th"); // TABLE HEADER.
+                th.innerHTML = result[i];
+                tr.appendChild(th);
+                if (result[i] == "First_Name") { th.innerHTML = "First Name"; }
+                if (result[i] == "Last_Name") { th.innerHTML = "Last Name"; }
+                if (result[i] == "Sex") { th.innerHTML = "Gender"; }
+                if (result[i] == "Date_Registered") { th.innerHTML = "Registered Date"; }
+                if (result[i] == "Date_Quit") { th.innerHTML = "Quit Date"; }
+            }
+            // ADD JSON DATA TO THE TABLE AS ROWS.
+            for (var i = 0; i < jsonStringData.length; i++) {
+                tr = table.insertRow(-1);
+                for (var j = 0; j < col.length; j++) {
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = jsonStringData[i][col[j]];
+                    tr.setAttribute("class", "cp");
+                    tr.setAttribute("onClick", "tblOnClick(this)");
+                }
+            }
+            var divContainer = document.getElementById('mystudents');
+            divContainer.innerHTML = "";
+            divContainer.appendChild(table);
+            var classScheduleDiv = document.getElementById('classSchedule');
+            var hCodedStudentClassesTitle = '<br><p><h4 id="mystudentnamelabel"><i class="far fa-address-card"></i> &nbsp;&nbsp;&nbsp;My Student\'s Currently Enrolled Classes: </h4></p><div id = "mystudentsdetail" style="overflow:auto"></div><br><button class="bl_btn hbl_btn" id="myStntPntBtn" type="button" onclick="printData(\'classSchedule\');"><i class="fas fa-print"></i>&nbsp;&nbsp;&nbsp;Print</button>';
+            classScheduleDiv.insertAdjacentHTML('beforeEnd', hCodedStudentClassesTitle);
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                document.body.style ="cursor: wait";
+                var studentDetail = TestForERROR(serverMethods().aegGetStudentsDetail(document.getElementById("studentsTable").rows[1].cells[0].innerHTML));
+                document.body.style ="cursor: auto";
+            _selectedStudent_ID = document.getElementById("studentsTable").rows[1].cells[0].innerHTML;
+            _selectedStudent_Name = document.getElementById("studentsTable").rows[1].cells[1].innerHTML + " " + document.getElementById("studentsTable").rows[1].cells[2].innerHTML;
+            document.getElementById('mystudentnamelabel').innerHTML = '<i class="far fa-address-card"></i> &nbsp;&nbsp;&nbsp;' + _selectedStudent_Name + '\'s Currently Enrolled Classes:'
+            showStudentsDetail(studentDetail);
+            document.getElementById("studentsTable").rows[1].classList.add('highlighted');
+        }
+        function recoverPWSubmit() { //Called when Recovering password.
+            var recoverEmailAdr = document.getElementById('recoverEmailAdr');
+            //var s = serverMethods().aegRecoverEmail(recoverEmailAdr);
+            //valueField.value = s.result;
+            if ((testValidEmail(recoverEmailAdr.value)) && (recoverEmailAdr.value !== '')) {
+                showError("Success");
+                recoverEmailAdr.value = '';
+                hide('PwRecoverFrm-modal-overlay');
+                hide("PwRecoverFrm");
+            } else {
+                //showError("Please enter a valid email address!");
+                //console.log("Fail");
+            }
+        }
+        function changePWSubmit() { //called from Change Password Form.
+            var currentPw = document.getElementById('currentPw');
+            var newPwFirst = document.getElementById('newPwFirst')
+            var newPwSecond = document.getElementById('newPwSecond')
+            if (newPwFirst.value == newPwSecond.value) {
+                if (testPasswordValid(newPwFirst.value)) {
+                        if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                        document.body.style ="cursor: wait";
+                        var s = serverMethods().aegChangePassword(currentPw.value, newPwFirst.value);
+                        document.body.style ="cursor: auto";
+                   // showError(s.result);
+                    if (s.result == '0') { // OK
+                        showError("Password Successfully Changed.");
+                        hide('PwChgFrm-modal-overlay');
+                        hide('PwChgFrm');
+                        document.getElementById('currentPw').value= "";
+                        newPwFirst = document.getElementById('newPwFirst').value = "";
+                        newPwSecond = document.getElementById('newPwSecond').value = "";
+                    }else if (s.result == '1'){ //SQL Error
+                        showError('SQL Execute Error Trying To Update Password. Please Try Again.');
+                    }else if (s.result == '2'){ //Current PW incorrect
+                        showError("Current Password Doesn't Match. Please Enter Current Password.");
+                        currentPw.value = '';
+                        currentPw.focus();
+                    }else if (s.result == '4'){ //this will probably never happen because of the getSessionID() test above
+                        showError("Recevied. However, This Connector Disabled. Please Log Out And Try Later.");
+                        }
+                } else {
+                    showError("Password Must Contain At Least 6 Characters. Must Include UPPER/lowercase And Numbers!");
+                    newPwFirst.focus();
+                }
+            } else {
+                showError("New Selected Passwords Do Not Match!");
+                newPwFirst.focus();
+            }
+        }
+        function testNameValid(input) { //Reg Expression check for if an entered name is valid. Returns True or False.
+            var patt = new RegExp(/^(?=.{1,40}$)[a-zA-Z]+(?:[-'\s][a-zA-Z]+)*$/);
+            var res = patt.test(input);
+            //console.log("Is regular matches:", res);
+            return res;
+        }
+        function testPasswordValid(input) { //Reg Expression check for if an entered password is valid. Returns True or False.
+            var patt = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d$@$!%*?&.]{6,}/);
+            var res = patt.test(input);
+            //console.log("Is regular matches:", res);
+            return res;
+        }
+        function testValidEmail(input) { //Reg Expression check for if an entered email is valid. Returns True or False.
+            var patt = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+            var res = patt.test(input);
+            //console.log(input + " is valid email: ", res);
+            return res;
+        }
+        function regNewAcct() {
+            var newAccountEmail = document.getElementById('newAccountEmail');
+            //result handler here i.e. if response bool = true, success, else fail
+            //success
+            if ((testValidEmail(newAccountEmail.value)) && (newAccountEmail.value !== '')) {
+                // showError("success");
+                // var s = serverMethods().aegNewAccount(newActEmail);
+                //console.log("success");
+                newAccountEmail.value = '';
+                hide('NewActFrm-modal-overlay');
+                hide("NewActFrm");
+            } else {
+                //showError("Please enter a valid email address!");
+                //console.log("Fail");
+            }
+        }
+        function resetSearch() {  // Reset Class Search items to default state.
+            document.getElementById("inclusive").checked = true;
+            document.getElementById("exclusive").checked = false;
+            selectBoxes = ["Student_Age", "Gender", "Level", "ClassType"];
+
+            for (var i = 0; i < 4; i++) {
+                document.getElementById(selectBoxes[i]).selectedIndex = 0;
+            }
+
+            daysoftheweek = ["SearchSun", "SearchMon", "SearchTue", "SearchWed", "SearchThu", "SearchFri", "SearchSat"];
+            for (var i = 0; i < 7; i++) {
+                document.getElementById(daysoftheweek[i]).style = "font-weight: 100 ;cursor: pointer; color:#888;";
+            }
+        }
+        function clearPWFrm() {  // Reset Change Cassword Form to default state.
+            document.getElementById('currentPw').value = '';
+            document.getElementById('newPwFirst').value = '';
+            document.getElementById('newPwSecond').value = '';
+        }
+        function EnrollStudent() { //Called when the user attempts to Enroll a Studen in a class within Class Search.
+            if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+            document.getElementById('EnrollReqBtn').disabled = true; //debounce limiter.
+            document.body.style ="cursor: wait";
+            var s = TestForERROR(serverMethods().aegEnrollStudent(_selectedClass_Code, _selectedStudent_ID, "aClientID", _selectedTeacher_Code, _selectedTuition_Code, "Web-user", sunStartTime, monStartTime, tueStartTime, wedStartTime, thuStartTime, friStartTime, satStartTime));
+            //console.log(s.result);
+            document.body.style ="cursor: auto";
+                if (s == "Ok") {
+                    showError(_selectedStudent_Name + " Successfully Enrolled in " + _selectedClass_Name +'!');
+                    hide('EnrollConfFrm-modal-overlay');
+                    hide('EnrollConfFrm');
+                    //update student detail here
+                    if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                    document.body.style ="cursor: wait";
+                    showStudentsDetail(TestForERROR(serverMethods().aegGetStudentsDetail(_selectedStudent_ID)));
+                    document.body.style ="cursor: auto";
+                    document.getElementById('EnrollReqBtn').disabled = false;
+                } else {
+                    showError("Error! Student Not Enrolled");
+                    document.getElementById('EnrollReqBtn').disabled = false;
+                }
+        }
+        function genderUpdate() { //Populates Class Search paramters based on selected student
+            var student_gender = document.getElementById("studentsDetailTable").rows[1].cells[5].innerHTML;
+            if (student_gender == "F") { document.getElementById("Gender").selectedIndex = 1; }
+            else if (student_gender == "M") { document.getElementById("Gender").selectedIndex = 2; }
+        }
+        function studentAgeCalc() { //Populates Class Search paramters based on selected student
+            var bdayTabled = document.getElementById("studentsDetailTable").rows[1].cells[4].innerHTML;
+            birthday = new Date(bdayTabled);
+            _selectedStudent_Age = new Number((new Date().getTime() - birthday.getTime()) / 31536000000).toFixed(0);
+            if (_selectedStudent_Age <= 18) {
+                document.getElementById("Student_Age").selectedIndex = parseInt(_selectedStudent_Age);
+            } else if (_selectedStudent_Age > 18) {
+                document.getElementById("Student_Age").selectedIndex = 18;
+            } else { }
+        }
+        function clearPaySelected() {
+            var my_table = $('#balDueTable').DataTable()
+            my_table
+                .page.len(-1) // set the length to -1
+                .draw()
+            for (var i = 0; i < document.getElementById("balDueTable").rows.length - 1; i++) {
+                document.getElementById("paySelect" + [i]).checked = false;
+            }
+        }
+        function allPaySelected() {
+            var my_table = $('#balDueTable').DataTable()
+            my_table
+                .page.len(-1) // set the length to -1
+                .draw()
+            for (var i = 0; i < document.getElementById("balDueTable").rows.length - 1; i++) {
+                if (document.getElementById("paySelect" + [i]).value == "false") {
+                    document.getElementById("paySelect" + [i]).checked = false;
+                } else {
+                    document.getElementById("paySelect" + [i]).checked = true;
+                }
+            }
+        }
+        function getBalDue() { //Populates BalDueDiv HTML Element
+            //if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+            // var balDue = serverMethods().aegBalDue();
+            // var balTotal = serverMethods().aegBalDueTotal();
+            // showError("BalDue data"+balDue.result+" Total:"+balTotal.result);
+
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+
+                document.body.style ="cursor: wait";
+                var dataOBJ = TestForERROR(serverMethods().aegCharges());
+                var jsonStringDataRes = JSON.parse(dataOBJ);
+                document.body.style ="cursor: auto";
+
+            var jsonStringData = jsonStringDataRes["aaData"];
+            var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+            var col = [];
+            for (var i = 0; i < jsonStringData.length; i++) {
+                for (var key in jsonStringData[i]) {
+                    if (col.indexOf(key) === -1) {
+                        col.push(key);
+                    }
+                }
+            }
+            var table = document.createElement("table");
+            table.setAttribute("class", "table");
+            table.setAttribute("id", "balDueTable");
+
+            // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+            var header = table.createTHead();
+            var tr = header.insertRow(-1); // TABLE ROW.
+            for (var i = 0; i < result.length; i++) {
+                var th = document.createElement("th"); // TABLE HEADER.
+                th.innerHTML = result[i];
+                tr.appendChild(th);
+                if (result[i] == "Checked") { th.innerHTML = "Selected"; }
+                if (result[i] == "Charge_Date") { th.innerHTML = "Charge Date"; }
+                if (result[i] == "Balance") { th.innerHTML = "Owed"; }
+            }
+            // ADD JSON DATA TO THE TABLE AS ROWS.
+            var body = table.createTBody();
+            for (var i = 0; i < jsonStringData.length; i++) {
+                tr = body.insertRow(-1);
+                for (var j = 0; j < col.length; j++) {
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = jsonStringData[i][col[j]];
+                    tr.setAttribute("id", "paySelectRow" + i);
+                    if ((j == 0) && (tabCell.innerHTML == "0")) { tabCell.innerHTML = '<input type="checkbox" id="paySelect' + i + '" name="paySelect' + i + '" value="false" class="cp" disabled style="width: 30px;height: 30px;">' }
+                    if (j == 4) { tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+                    if (j == 5) { tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+                    if ((j == 6) && (tabCell.innerHTML != "0")) {
+                        tabCell.setAttribute("style", "background-color:red");
+                        tr.cells[j - 6].innerHTML = '<input type="checkbox" id="paySelect' + i + '" name="paySelect' + i + '" value="true" class="cp" checked style="width: 30px;height: 30px;">'
+                    }
+                    if (j == 6) { tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+
+                }
+            }
+            var divContainer = document.getElementById('balDueDiv');
+            divContainer.innerHTML = "";
+            divContainer.appendChild(table);
+            $.fn.dataTable.moment('l');
+            $('#balDueTable').DataTable({
+                "pagingType": "full_numbers",
+                "processing": true,
+                "autoWidth": true,
+                // sDom: "<'top'ilf>rt<'bottom'p><'clear'>",
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                "order": [[1, "desc"]],
+                "columnDefs": [
+                    { targets: 3, className: 'dt-body-right' },
+                    { targets: 4, className: 'dt-body-right' },
+                    { targets: 5, className: 'dt-body-right' },
+                    { targets: -1, className: 'dt-body-right' }
+                ]
+            });
+        }
+        function submitPayment() { //Submit Payment Event
+            //var paymentAmount = document.getElementById("paymentAmount").value;
+            // document.getElementById("FIBal").innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2);
+            var paymentAmount = document.getElementById('balDueAmountTable').rows[1].cells[0].innerHTML;
+            //var s = serverMethods().aegMakePayment(paymentAmount);
+            //showError("Paid: " + paymentAmount);
+            if (paymentAmount == "$0.00") { showError("No Outstanding Balance Or No Items Selected. Payment Not Processed."); }
+            else {
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                document.body.style ="cursor: wait";
+                var s = TestForERROR(serverMethods().aegMakePayment(paymentAmount));
+                document.body.style ="cursor: auto";
+                showError("Outstanding Balance Of $" + paymentAmount + " Paid In Full.");
+            }
+            hide('makePaymentFrm-modal-overlay');
+            hide('makePaymentFrm');
+            getBalDue();
+            getFamilyInfo();
+        }
+        function submitItemizedPayment() { //Submit Itemized Payment Event
+            // var my_table = $('#balDueTable').DataTable()
+            //     my_table
+            //     .page.len(-1) // set the length to -1
+            //     .draw()
+            // var paymentAmount = [];
+            // var paymentItems = [];
+            // paymentAmount.length = 0; //clear
+            // paymentItems.length = 0;  //clear
+
+            // var j = 0;
+            // var balDueTable = document.getElementById("balDueTable");
+            // for (var i = 1; i < balDueTable.rows.length; i++) {
+            //     if (document.getElementById("paySelect" + (i-1) ).checked == true) {
+            //         console.log("paySelect"+ (i-1));
+            //         var thisrow = document.getElementById("paySelectRow"+ (i-1));
+            //         console.log(thisrow.id);
+            //         //paymentAmount.push(balDueTable.rows[i].cells[6].innerHTML);
+            //         paymentAmount.push(thisrow.cells[6].innerHTML);
+            //         paymentItems[j++] = {
+            //             Date: thisrow.cells[1].innerHTML,
+            //             Category: thisrow.cells[2].innerHTML,
+            //             Comment: thisrow.cells[3].innerHTML,
+            //             Amount: thisrow.cells[6].innerHTML.slice(1, ),
+            //             Charge_ID: thisrow.cells[7].innerHTML,
+            //             Trans_ID: thisrow.cells[8].innerHTML,
+            //         }
+            //     }
+            // }
+            // var paySum = 0.00;
+            //     for (var i = 0; i < paymentAmount.length; i++ ){
+            //         paymentAmount[i] = parseFloat(paymentAmount[i].slice(1, ));
+            //         var paySum = paymentAmount[i] + paySum;
+            //     }
+            //console.log(paymentAmount);
+            //console.log(paymentItems); //will be passed to server. contains Amount: , Charge_ID, Trans_ID of each item user selects
+            //var paymentAmount = document.getElementById('balDueAmountTable').rows[1].cells[0].innerHTML;
+            //var s = serverMethods().aegMakePayment(paymentAmount);
+            //showError("Paid: " + paymentAmount);
+            if (paySum == "0") { showError("No Outstanding Balance Or No Items Selected. Payment Not Processed."); }
+            else {
+                //var s = serverMethods().aegMakeItemizedPayment(paymentAmount, paymentItems);
+                // var paySum = 0.00;
+                // for (var i = 0; i < paymentAmount.length; i++ ){
+                //     paymentAmount[i] = parseFloat(paymentAmount[i].slice(1, ));
+                //     var paySum = paymentAmount[i] + paySum;
+                // }
+                // TODO: use serverMethods().aegMakeItemizedPayment(paymentAmount Charge_ID, Trans_ID, etc in Charges DB)
+                //console.log(paymentAmount);// array of amounts to be paid (selected by user).
+                //console.log(paySum); //Sum of items to be paid.
+                showError("Outstanding Balance Of " + paySum.toFixed(2) + " Paid.");
+                alert("serverMethods().aegMakeItemizedPayment(paymentAmount, paymentItems); NOT IMPLEMENTED SERVER-SIDE! SCOTT/Alex TODO")
+            }
+            hide('makeItemizedPaymentFrm-modal-overlay');
+            hide('makeItemizedPaymentFrm');
+            getFamilyInfo();
+            getBalDue();
+        }
+        function addSelectClassLvl() { //Populates Class Search paramters based on specific gym
+            levelElement = document.getElementById("Level");
+
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                document.body.style ="cursor: wait";
+                var dataOBJ = TestForERROR(serverMethods().aegGetClassLvl());
+                document.body.style ="cursor: auto";
+                var jsonStringDataRes = JSON.parse(dataOBJ);
+
+            var jsonStringClassLvl = jsonStringDataRes["aaData"];
+            for (var i = 0; i < jsonStringClassLvl.length; i++) {
+                y = document.createElement(("option"));
+                y.text = jsonStringClassLvl[i][1];
+                y.value = jsonStringClassLvl[i][0];
+                levelElement.add(y);
+                //console.log(jsonStringClassLvl[i]);
+            }
+        }
+        function addSelectClassType() { //Populates Class Search paramters based on specific gym
+            levelElement = document.getElementById("ClassType");
+
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                document.body.style ="cursor: wait";
+                var dataOBJ = TestForERROR(serverMethods().aegGetClassType());
+                document.body.style ="cursor: auto";
+                var jsonStringDataRes = JSON.parse(dataOBJ);
+
+            var jsonStringClassType = jsonStringDataRes["aaData"];
+            for (var i = 0; i < jsonStringClassType.length; i++) {
+                y = document.createElement(("option"));
+                y.text = jsonStringClassType[i][1];
+                y.value = jsonStringClassType[i][0];
+                levelElement.add(y);
+                //console.log(jsonStringClassType[i]);
+            }
+        }
+        function hOver() { //UI popup event on Class Search
+            var SubmitRequestToServerBtn = document.getElementById("SubmitRequestToServerBtn");
+            SubmitRequestToServerBtn.classList.add('highlightedBtn');
+        }
+        function hNotOver() { //UI popup event on Class Search
+            var SubmitRequestToServerBtn = document.getElementById("SubmitRequestToServerBtn");
+            SubmitRequestToServerBtn.classList.remove('highlightedBtn');
+        }
+        function getFamilyInfo() { //Populates Family Info
+
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                document.body.style ="cursor: wait";
+                var dataOBJ = TestForERROR(serverMethods().aegGetFamilyInfo());
+                document.body.style ="cursor: auto";
+
+                var jsonStringDataRes = JSON.parse(dataOBJ);
+
+                var jsonStringData = jsonStringDataRes["aaData"];
+                var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+                var col = [];
+                for (var i = 0; i < jsonStringData.length; i++) {
+                    for (var key in jsonStringData[i]) {
+                        if (col.indexOf(key) === -1) {
+                            col.push(key);
+                        }
+                    }
+                }
+
+
+            var table = document.createElement("table");
+            table.setAttribute("class", "table");
+            table.setAttribute("id", "familyInfoTable");
+            // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+            var header = table.createTHead();
+            var tr = header.insertRow(-1); // TABLE ROW.
+            for (var i = 0; i < result.length; i++) {
+                var th = document.createElement("th"); // TABLE HEADER.
+                //console.log(result[i])
+                th.innerHTML = result[i];
+                tr.appendChild(th);
+            }
+            // ADD JSON DATA TO THE TABLE AS ROWS.
+            var body = table.createTBody();
+            //console.log(jsonStringData)
+            for (var i = 0; i < jsonStringData.length; i++) {
+                tr = body.insertRow(-1);
+                for (var j = 0; j < col.length; j++) {
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = jsonStringData[i][col[j]];
+                    if (j == 1) { document.getElementById("FIParentName").innerText = tr.cells[(j - 1)].innerHTML + " " + tabCell.innerHTML; }
+                    if (j == 2) { document.getElementById("FIEmail").innerText = tabCell.innerHTML; }
+                    if (j == 3) { document.getElementById("FIPhone").innerText = tabCell.innerHTML; }
+                    if (j == 4) { document.getElementById("FIAddress").innerText = tabCell.innerHTML; }
+                    if (j == 5) { document.getElementById("FICity").innerText = tabCell.innerHTML; }
+                    if (j == 6) { document.getElementById("FIState").innerText = tabCell.innerHTML; }
+                    if (j == 7) { document.getElementById("FIZip").innerText = tabCell.innerHTML; }
+                    if (j == 8) { document.getElementById("FIBal").innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+                    if ((j == 8) && (document.getElementById("FIBal").innerHTML == "$NaN")) { document.getElementById("FIBal").innerHTML = '$0.00'}
+                    if (j == 12) { document.getElementById("FIAccCredit").innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+                    if ((j == 12) && (document.getElementById("FIAccCredit").innerHTML == "$NaN")) { document.getElementById("FIAccCredit").innerHTML = '$0.00'}
+                    if (j == 13) { document.getElementById("FILastPayDate").innerHTML = '&nbsp;&nbsp;' + tabCell.innerHTML; }
+                    if (j == 14) { document.getElementById("FILastPayAmount").innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+                }
+            }
+        }
+        function getAutoPayInfo() { //Populates Saved Card Info (if any exists)
+
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                document.body.style ="cursor: wait";
+                var dataOBJ = TestForERROR(serverMethods().aegGetAutoPayInfo());
+                document.body.style ="cursor: auto";
+                var jsonStringDataRes = JSON.parse(dataOBJ);
+
+            var jsonStringData = jsonStringDataRes["aaData"];
+            var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+            var col = [];
+            for (var i = 0; i < jsonStringData.length; i++) {
+                for (var key in jsonStringData[i]) {
+                    if (col.indexOf(key) === -1) {
+                        col.push(key);
+                    }
+                }
+            }
+            var table = document.createElement("table");
+            table.setAttribute("class", "table");
+            table.setAttribute("id", "AutoPayInfoTable");
+            // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+            var header = table.createTHead();
+            var tr = header.insertRow(-1); // TABLE ROW.
+            for (var i = 0; i < result.length; i++) {
+                var th = document.createElement("th"); // TABLE HEADER.
+                //console.log(result[i])
+                th.innerHTML = result[i];
+                tr.appendChild(th);
+            }
+            // ADD JSON DATA TO THE TABLE AS ROWS.
+            var body = table.createTBody();
+            //console.log(jsonStringData)
+            for (var i = 0; i < jsonStringData.length; i++) {
+                tr = body.insertRow(-1);
+                for (var j = 0; j < col.length; j++) {
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = jsonStringData[i][col[j]];
+                    if (j == 0) { document.getElementById("FIExpDate").innerText = tabCell.innerHTML; }
+                    if (j == 1) { document.getElementById("FICardName").innerText = tabCell.innerHTML; }
+                    if (j == 2) { document.getElementById("FICardAddress").innerText = tabCell.innerHTML; }
+                    if (j == 3) { document.getElementById("FICardCity").innerText = tabCell.innerHTML; }
+                    if (j == 4) { document.getElementById("FICardState").innerText = tabCell.innerHTML; }
+                    if (j == 5) { document.getElementById("FICardZip").innerText = tabCell.innerHTML; }
+                    if (j == 6) { document.getElementById("FIPassCardType").innerText = tabCell.innerHTML; }
+                    if ((j == 6) && (tabCell.innerHTML == 'Visa')) { document.getElementById("FIPassCardType").innerHTML = tabCell.innerHTML + '&nbsp;&nbsp;&nbsp;<i class="fab fa-cc-visa"></i>'; }
+                    if ((j == 6) && (tabCell.innerHTML == 'Mastercard')) { document.getElementById("FIPassCardType").innerHTML = tabCell.innerHTML + '&nbsp;&nbsp;&nbsp;<i class="fab fa-cc-mastercard"></i>'; }
+                    if ((j == 6) && (tabCell.innerHTML == 'Discover')) { document.getElementById("FIPassCardType").innerHTML = tabCell.innerHTML + '&nbsp;&nbsp;&nbsp;<i class="fab fa-cc-discover"></i>'; }
+                    if ((j == 6) && (tabCell.innerHTML == 'Amex')) { document.getElementById("FIPassCardType").innerHTML = tabCell.innerHTML + '&nbsp;&nbsp;&nbsp;<i class="fab fa-cc-amex"></i>'; }
+                    if (j == 7) { document.getElementById("FIPassCardNum").innerText = tabCell.innerHTML; }
+                }
+            }
+        }
+        function getPayments() {
+
+                if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+                document.body.style ="cursor: wait";
+                var dataOBJ = TestForERROR(serverMethods().aegPayments());
+                document.body.style ="cursor: auto";
+                var jsonStringDataRes = JSON.parse(dataOBJ);
+
+            var jsonStringData = jsonStringDataRes["aaData"];
+            var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+            var col = [];
+            for (var i = 0; i < jsonStringData.length; i++) {
+                for (var key in jsonStringData[i]) {
+                    if (col.indexOf(key) === -1) {
+                        col.push(key);
+                    }
+                }
+            }
+            var table = document.createElement("table");
+            table.setAttribute("class", "table");
+            table.setAttribute("id", "paymentsTable");
+
+            // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+            var header = table.createTHead();
+            var tr = header.insertRow(-1); // TABLE ROW.
+            for (var i = 0; i < result.length; i++) {
+                var th = document.createElement("th"); // TABLE HEADER.
+                th.innerHTML = result[i];
+                tr.appendChild(th);
+                if (result[i] == "Payment_Date") { th.innerHTML = "Payment Date"; }
+                if (result[i] == "Check_Num") { th.innerHTML = "Check #"; }
+            }
+            // ADD JSON DATA TO THE TABLE AS ROWS.
+            var body = table.createTBody();
+            for (var i = 0; i < jsonStringData.length; i++) {
+                tr = body.insertRow(-1);
+                for (var j = 0; j < col.length; j++) {
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = jsonStringData[i][col[j]];
+                    if ((j == 3) && (tabCell.innerHTML == "True")) {
+                        tr.setAttribute("style", "text-decoration: line-through");
+                    }
+                    //if (j == 1) { tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+                   // if ((j == 1) && (tabCell.innerHTML == "CCard")) {tabCell.innerHTML = "CCard" + '&nbsp;&nbsp;&nbsp;<i class="far fa-credit-card"></i>';}
+                   // if ((j == 1) && (tabCell.innerHTML == "Cash")) {tabCell.innerHTML = "Cash" + '&nbsp;&nbsp;&nbsp;<i class="far fa-money-bill-alt"></i>';}
+                   // if ((j == 1) && (tabCell.innerHTML == "Check")) {tabCell.innerHTML = "CCard" + '&nbsp;&nbsp;&nbsp;<i class="fas fa-money-check"></i>';}
+                   // if ((j == 1) && (tabCell.innerHTML == "ATM")) {tabCell.innerHTML = "ATM" + '&nbsp;&nbsp;&nbsp;<i class="fas fa-credit-card"></i>';}
+                    if (j == 4) { tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+                    //if (j == 4) { tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2); }
+                }
+            }
+            var divContainer = document.getElementById('prevPaymentsDiv');
+            divContainer.innerHTML = "";
+            divContainer.appendChild(table);
+            $.fn.dataTable.moment('l');
+            $('#paymentsTable').DataTable({
+                "pagingType": "full_numbers",
+                "processing": true,
+                "autoWidth": true,
+                // sDom: "<'top'ilf>rt<'bottom'p><'clear'>",
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                "order": [[0, "desc"]],
+                "columnDefs": [//{ targets: 1, className: 'dt-body-right' },
+                    //{ targets: 3, className: 'dt-body-right' },
+                    //{ targets: 4, className: 'dt-body-right' },
+                    { targets: -1, className: 'dt-body-right' }
+                ]
+            });
+        }
+
+
+        function errorServerMethodHandler(sMsg) { //called when a try fails because of a serverMethod(). Failure.
+            // NO LONGER USED> USE TestForERROR() instead
+            console.log('WebConnector Unreachable in '+sMsg+'. Please Try Again Later.');
+            showError('WebConnector Unreachable in '+sMsg+'. Please Try Again Later.');
+        }
+
+        function TestForERROR (input){ // Expected: Call with i.e. TestForERROR(serverMethods().aegGymEmail()); MUST BE LOGGED IN!
+            var patt = new RegExp(/!ERROR/g);
+            var res = patt.test(input.result);
+            if (res == true ){showError(input.result);console.log(input.result);}else{};
+            return input.result;
+        }
+
+        function showError(x){
+            var patt = new RegExp(/!ERROR Connector Disabled/g);
+            var res = patt.test(x);
+            if (res == true ){
+                show('DisabledFrm-modal-overlay');
+                show("DisabledFrm");
+                document.getElementById('DisabledFrmMsg').textContent=('The system is temporarily unavailable.  Please try again later.');
+            }else{
+                $("#TopErrorDiv").removeClass("slide-in-top");
+                $("#TopErrorDiv").removeClass("slide-out-top");
+                hide("TopErrorDiv");
+                const sleep = (milliseconds) => {
+                return new Promise(resolve => setTimeout(resolve, milliseconds))
+                }
+                document.getElementById('mainErrorBarMsg').textContent=(x);
+                show("TopErrorDiv")
+                $("#TopErrorDiv").addClass("slide-in-top");
+                sleep(600).then(() => {
+                    $("#TopErrorDiv").removeClass("slide-in-top");
+                    sleep(5000).then(() => {
+                        $("#TopErrorDiv").addClass("slide-out-top");
+                        sleep(500).then(() => {
+                        $("#TopErrorDiv").removeClass("slide-out-top");
+                        hide("TopErrorDiv")
+                        })
+                    })
+                })
+            }
+        }
+
+        function clientDisabledCheck(){
+            if (document.getElementById("errorTag").innerText == "1"){return}
+            else{
+                hide("Nav0");
+                hide("NavPreLoginSearch");
+                //show('DisabledFrm-modal-overlay');
+                //show("DisabledFrm");
+                document.getElementById('DisabledFrmMsg').textContent=('The system is temporarily unavailable.  Please try again later.');
+                document.getElementById('DisabledTopMsg').textContent=('The system is temporarily unavailable.  Please try again later.');
+                show('DisabledTopMsg');
+            }
+
+        };
+
+        function addStudentSubmit() {
+            var addfirstName = document.getElementById('add_First_Name').value.charAt(0).toUpperCase() + document.getElementById('add_First_Name').value.substr(1),
+                addlastName = document.getElementById('add_Last_Name').value.charAt(0).toUpperCase() + document.getElementById('add_Last_Name').value.substr(1),
+                addBirthdate = document.getElementById('datepicker').value;
+            addGender = "F";
+            if (document.getElementById("add_Gender_Female").checked == true) {
+                addGender = "F";
+            } else {
+                addGender = "M";
+            }
+            var today = new Date();
+            var add_Registered_Date = (today.getMonth() + 1) + '-' + today.getDate() + '-' + today.getFullYear();
+
+            if ((testNameValid(addfirstName)) && (testNameValid(addlastName)) && (addBirthdate != '')) {
+                    //addgender = document.getElementById('add_Gender').value,
+                    var r = confirm('Are you sure you wish you add this student?\n' + "\nFirst Name: " + addfirstName + "\nLast Name: " + addlastName + "\nGender: " + addGender + "\nBirthdate: " + addBirthdate + "\non " + add_Registered_Date);
+                    if (r == true) {
+                        showError("Adding Student");
+                        if (getSessionID() == null) {location.reload();} //expected behavor is to have the if statement return false if the user has a current session id. If the if statement returns true (there is no current session id), the page should reload, presenting a default, pre-login page.
+
+                        if (window.confirm('TODO: serverMethods().aegAddStudent ??' )){hide('AddStudentFrm-modal-overlay');hide('AddStudentFrm');} // only a dev notice. Remove when implemented.
+                    //uncomment code below once we write aegAddStudent, if that's a feature we ever add.
+                    //var s = serverMethods().aegAddStudent(addfirstName, addlastName, addBirthdate);
+                    //document.body.style ="cursor: auto";
+                    // if (s.result == '0') { // OK
+                    //     showError("Student Added Successfully");
+                    //     hide('AddStudentFrm-modal-overlay');
+                    //     hide('AddStudentFrm');
+                    //     document.getElementById('add_First_Name').value= "";
+                    //     newPwFirst = document.getElementById('add_Last_Name').value = "";
+                    //     newPwSecond = document.getElementById('datepicker').value = "";
+                    // }else if (s.result == '1'){ //SQL Error
+                    //     showError('SQL Execute Error Trying To Insert Student. Please Try Again.');
+                    } else {
+                        showError("Adding Student Canceled!");
+                        hide('AddStudentFrm-modal-overlay');
+                        hide('AddStudentFrm');
+                        document.getElementById('add_First_Name').value = '';
+                        document.getElementById('add_Last_Name').value ='';
+                        document.getElementById('datepicker').value = '';
+                    }
+
+
+            } else { showError('Please Fill Out All Fields.') }
+
+            // else {
+            //     //console.log("Fail");
+            //     showError("Password must contain at least 6 characters. Must include UPPER/lowercase and numbers!");
+            //     newPwFirst.focus();
+            // }
+        }
+        function mainpageLoadError(error) { //Called if main onLoad event fails try
+            //showError(error)
+            document.getElementById('navbarDiv').style.display = 'none';
+            document.getElementById('mainTitleBarAddress').innerText = 'Gym WebConnector Unreachable. Please Try Again Later.';
+            if (error.indexOf("Cannot read property 'length' of undefined") >= 0) {
+                //document.getElementById('mainTitleBarAddress').innerText = 'Session Expired. Please Refresh The Page And Log In Again.';
+                location.reload();
+            }
+            if (error.indexOf("TypeError: Cannot read property 'cells' of undefined") >= 0) {
+                document.cookie = 'dssessionid' + '=; expires=Thu, 01-Jan-70 00:00:01 GMT;'; //delete cookie
+                location.reload();
+            }
+
+
+        }
+        function classSchedulePreLoginTableConstructor() {
+            var jsonStringDataRes = JSON.parse(document.getElementById('classScheduleprefetcheddata').innerText);
+            //try {var jsonStringDataRes = JSON.parse(document.getElementById('classScheduleprefetcheddata').innerText);}
+            //
+            //catch(error) {
+            //    console.log("Bad Data in classScheduleprefetcheddata Tag. Attempting to format JSON:")
+            //    var prejsonSD = document.getElementById('classScheduleprefetcheddata').innerText;
+            //    prejsonSD = prejsonSD.replace('[[', '[["');
+            //    prejsonSD = prejsonSD.replace(new RegExp(/,/, 'g'), '\",\"');
+            //    prejsonSD = prejsonSD.replace(']]","', '"]],');
+            //    prejsonSD = prejsonSD.replace(/]","\[/g, '\"],\["');
+            //    prejsonSD = prejsonSD.replace(/}","\{/g, '"},\{');
+            //    prejsonSD = prejsonSD.replace(/{sTitle:/g, '{"sTitle":"');
+            //    prejsonSD = prejsonSD.replace(/aoColumns/g, '"aoColumns"');
+            //    prejsonSD = prejsonSD.replace(/aaData/g, '"aaData"');
+            //    prejsonSD = prejsonSD.replace(/}]}/g, '\"},{\"sTitle\":\"spacer\"}]}');
+            //
+            //    try {var jsonStringDataRes = JSON.parse(prejsonSD);}
+            //    catch(error){console.log('FAIL!'); var JSONFmtFail = 1;}
+            //  }
+            var JSONFmtFail = 1;
+                if (JSONFmtFail != 1){console.log("SUCCESS!")}
+                    var jsonStringData = jsonStringDataRes["aaData"];
+                    var result = jsonStringDataRes.aoColumns.map(a => a.sTitle);
+
+            var col = [];
+            for (var i = 0; i < jsonStringData.length; i++) {
+                for (var key in jsonStringData[i]) {
+                    if (col.indexOf(key) === -1) {
+                        col.push(key);
+                    }
+                }
+            }
+            var table = document.createElement("table");
+            table.setAttribute("class", "table");
+            // table.setAttribute("style","all:unset");
+            table.setAttribute("class", "display");
+            table.setAttribute("class", "cell-border");
+            table.setAttribute("class", "compact");
+            table.setAttribute("class", "hover")
+            // table.setAttribute("style","width:100%");
+            table.setAttribute("id", "classSchedulePreLoginRenderedTable");
+
+            // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+            var header = table.createTHead();
+            var tr = header.insertRow(-1); // TABLE ROW.
+            //tr.insertCell(-1); // for testing
+            for (var i = 0; i < result.length; i++) {
+                var th = document.createElement("th"); // TABLE HEADER.
+                th.innerHTML = result[i];
+                if (result[i] == "Portal_Enrollable") { th.innerHTML = ""; }
+                if (result[i] == "name") { th.innerHTML = "Class Name"; }
+                if (result[i] == "type") { th.innerHTML = "Class Type"; }
+                if (result[i] == "Description") { th.innerHTML = "Class Level"; }
+                if (result[i] == "sunday") { th.innerHTML = "Sun"; }
+                if (result[i] == "monday") { th.innerHTML = "Mon"; }
+                if (result[i] == "tuesday") { th.innerHTML = "Tue"; }
+                if (result[i] == "wednesday") { th.innerHTML = "Wed"; }
+                if (result[i] == "thursday") { th.innerHTML = "Thur"; }
+                if (result[i] == "friday") { th.innerHTML = "Fri"; }
+                if (result[i] == "saturday") { th.innerHTML = "Sat"; }
+                if (result[i] == "Type") { th.innerHTML = "Charge Interval"; }
+                if (result[i] == "Similar1") { th.innerHTML = "Cost Before Deductions"; }
+
+                th.setAttribute("style", "text-align:center");
+                tr.appendChild(th);
+            }
+
+            // ADD JSON DATA TO THE TABLE AS ROWS.
+            var body = table.createTBody();
+            for (var i = 0; i < jsonStringData.length; i++) {
+                tr = body.insertRow(-1);
+            // tr.insertCell(-1); // for testing
+                tr.setAttribute("style", "text-align:center");
+
+                for (var j = 0; j < col.length; j++) {
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = jsonStringData[i][col[j]];
+                    //tr.setAttribute("class", "cp");
+
+                    // if can enroll:
+                    //   0= all disabled, 1=Enroll Now only, 2=Call To Enroll only, 3= Enroll Now & Call To Enroll,  4 = Class Full only.
+                    // todo: going to change this to a bool instead of int flag ie. true =
+                    if ((tabCell.innerHTML == "True") && (j == 0)) {
+                        tr.setAttribute("onClick", "classClickToEnroll(this)");
+                        tr.setAttribute("class", "cp");
+                        tabCell.innerHTML = "<button class='btn-enrollNow cp' style='padding: 8px 16px;'><i class='far fa-check-circle'></i>&nbsp;Enroll Now";
+
+                    } else if ((tabCell.innerHTML == "False") && (j == 0)) {
+                        tr.setAttribute("onClick", "showError('Please Call The Office To Enroll.')");
+                        tr.setAttribute("style", "cursor:not-allowed");
+                        tabCell.innerHTML = "<button class='btn-callToEnroll' style='cursor:not-allowed;padding: 8px 16px;' disabled><i class='fas fa-phone'></i>&nbsp;Call To Enroll";
+                    } else if ((tabCell.innerHTML == "4") && (j == 0)) {
+                        tr.setAttribute("onClick", "showError('Sorry, This Class Is Full.')");
+                        tr.setAttribute("style", "cursor:not-allowed");
+                        tabCell.innerHTML = "<button class='btn-disabledEnroll' style='cursor:not-allowed;padding: 8px 16px;'disabled><i class='far fa-times-circle'></i>&nbsp;Class Full";
+                    }
+                    //True
+                    if ((tabCell.innerHTML == "True") && (j == 7)) {
+                        tabCell.style = "font-weight: 900;";
+                        tabCell.innerHTML = "S";
+                    } else if ((tabCell.innerHTML == "True") && (j == 8)) {
+                        tabCell.style = "font-weight: 900;";
+                        tabCell.innerHTML = "M";
+                    } else if ((tabCell.innerHTML == "True") && (j == 9)) {
+                        tabCell.style = "font-weight: 900;";
+                        tabCell.innerHTML = "T";
+                    } else if ((tabCell.innerHTML == "True") && (j == 10)) {
+                        tabCell.style = "font-weight: 900;";
+                        tabCell.innerHTML = "W";
+                    } else if ((tabCell.innerHTML == "True") && (j == 11)) {
+                        tabCell.style = "font-weight: 900;";
+                        tabCell.innerHTML = "Th";
+                    } else if ((tabCell.innerHTML == "True") && (j == 12)) {
+                        tabCell.style = "font-weight: 900;";
+                        tabCell.innerHTML = "F";
+                    } else if ((tabCell.innerHTML == "True") && (j == 13)) {
+                        tabCell.style = "font-weight: 900;";
+                        tabCell.innerHTML = "S";
+                        //false
+                    } else if ((tabCell.innerHTML == "False") && (j == 7)) {
+                        tabCell.style = "font-weight: 100;color:#888;";
+                        tabCell.innerHTML = "S";
+                    } else if ((tabCell.innerHTML == "False") && (j == 8)) {
+                        tabCell.style = "font-weight: 100;color:#888;";
+                        tabCell.innerHTML = "M";
+                    } else if ((tabCell.innerHTML == "False") && (j == 9)) {
+                        tabCell.style = "font-weight: 100;color:#888;";
+                        tabCell.innerHTML = "T";
+                    } else if ((tabCell.innerHTML == "False") && (j == 10)) {
+                        tabCell.style = "font-weight: 100;color:#888;";
+                        tabCell.innerHTML = "W";
+                    } else if ((tabCell.innerHTML == "False") && (j == 11)) {
+                        tabCell.style = "font-weight: 100;color:#888;";
+                        tabCell.innerHTML = "Th";
+                    } else if ((tabCell.innerHTML == "False") && (j == 12)) {
+                        tabCell.style = "font-weight: 100;color:#888;";
+                        tabCell.innerHTML = "F";
+                    } else if ((tabCell.innerHTML == "False") && (j == 13)) {
+                        tabCell.style = "font-weight: 100;color:#888;";
+                        tabCell.innerHTML = "S";
+                    } else if ((j >= 13) && (j < 21)) {
+                        if (tabCell.innerHTML.length == 21) {
+                            tabCell.innerHTML = tabCell.innerHTML.slice(11);
+                            tabCell.innerHTML = tabCell.innerHTML.slice(0, 4) + '&nbsp;' + tabCell.innerHTML.slice(8);
+                            tr.cells[(j - 7)].insertAdjacentHTML('beforeEnd', "<div style='font-weight:100;'>" + tabCell.innerHTML + "</div");
+                            //  working tr.cells[(j - 7)].innerHTML = tr.cells[(j - 7)].innerHTML + tr.cells[j].innerHTML;
+                        } else if (tabCell.innerHTML.length == 22) {
+                            tabCell.innerHTML = tabCell.innerHTML.slice(11);
+                            tabCell.innerHTML = tabCell.innerHTML.slice(0, 5) + '&nbsp;' + tabCell.innerHTML.slice(9);
+                            tr.cells[(j - 7)].insertAdjacentHTML('beforeEnd', "<div style='font-weight:100;'>" + tabCell.innerHTML + "</div");
+                        }
+                    } else if (j == 21) {
+                        if (tabCell.innerHTML == "M") {tabCell.innerText = "Per Month"};
+                        if (tabCell.innerHTML == "S") {tabCell.innerHTML = "Per Session"};
+                        if (tabCell.innerHTML == "H") {tabCell.innerHTML = "Per Hour"};
+
+                    } else if (j == 22) {
+                        tabCell.innerHTML = "$" + (parseFloat(tabCell.innerHTML)).toFixed(2);
+                    // }else if (j == 23){
+                    //     if (tabCell.innerHTML == undefined) {tabCell.innerHTML = " "}
+                    } else { }
+                }
+            }
+        var divContainer = document.getElementById('classSchedulePreLoginRenderedDiv');
+        divContainer.innerHTML = "";
+        divContainer.appendChild(table);
+        $('#classSchedulePreLoginRenderedTable').DataTable({ //populates HTML Div with the results provided above. Formatting table params below. https://datatables.net/reference/index
+            "pagingType": "full_numbers",
+            "order": [[2, "desc"]],
+            "autoWidth": true,
+            "processing": true,
+            //sDom: "<'top'ilf>rt<'bottom'p><'clear'>",
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        });
+    }
+    </script>
+</head>
+
+<!-- *********************************************************************************************************************************************************************************************** -->
+
+<body onload="try { onLoad() }
+                 catch(pageerror) {
+                    function mainpageLoadError(error) {
+                        console.log(error);
+                        //document.getElementById('navbarDiv').style.display = 'none';
+                        //document.getElementById('mainTitleBarAddress').innerText = 'Gym WebConnector Unreachable. Please Try Again Later.';
+                        if (error.indexOf(&#34;Cannot read property 'length' of undefined&#34;) >= 0) {
+                            //document.getElementById('mainTitleBarAddress').innerText = 'Session Expired. Please Refresh The Page And Log In Again.';
+                            location.reload();
+                        }
+                        if (error.indexOf(&#34;TypeError: Cannot read property 'cells' of undefined&#34;) >= 0) {
+                            document.cookie = 'dssessionid' + '=; expires=Thu, 01-Jan-70 00:00:01 GMT;'; //delete cookie
+                            location.reload();
+                        }
+                    }
+                    //mainpageLoadError(pageerror.toString());
+                }">
+    <noscript>
+        <div>
+            <h1 style="color:red">
+                Please enable JavaScript and reload the page. This website requires JavaScript.
+                <br>
+                <br>
+                <br>
+                <a href="https://www.google.com/search?q=how+to+enable+javascript">Click here to find out how.</a>
+                <br>
+                <br>
+                <br>
+                <h1>
+        </div>
+    </noscript>
+    <!-- WRAPPER -->
+    <button onclick="topFunction()" id="gotoTopBtn" title="Go to top"><i class="fas fa-angle-double-up"></i></button>
+    <div class="wrpr" id="wrpr">
+        <!-- MAIN PAGE ELEMENTS -->
+         <!-- ERROR DIV -->
+         <div id="TopErrorDiv" style="display: none;opacity: .99;z-index:101; position: fixed; top: 0; left: 0; width:100%;color:#fff;background-color:#b70404;text-align: center;padding:0px" >
+            <h2 id="mainErrorBarMsg" style="margin-top: 10px;margin-bottom: 10px;">Big Scary Error Message</h2>
+            <div><a id="errorTag" style="display: none;"><#ClientEnableprefetched></a></div>
+        </div>
+        <!-- HEADER -->
+        <header class="header" style="text-align:center">
+            <h1 class="h1" id="mainTitleBar"><#GetGymNameprefetched></h1>
+            <p id="mainTitleBarAddress"><#GetGymAddressprefetched>&nbsp;|&nbsp;<a id="gymEmail"><#GetGymEmailprefetched></a></p>
+            <div id="navbarDiv" class="navbar" style="display: inline-block">
+                <a id='Nav0' onclick="show('login');hide('ClassSearch');document.getElementById('userField').focus();"
+                    class="cp" style="display: block"><i class="fas fa-child"></i>&nbsp;&nbsp;&nbsp;LOG IN</i></a>
+                <a id='Nav1' style="display: none" onclick="show('classSchedule');document.getElementById('classSchedule').scrollIntoView();"
+                    class="cp"><i class="fas fa-child"></i>&nbsp;&nbsp;&nbsp;MY STUDENTS</i></a>
+                    <!-- Searchable class searching is currently not working for non-logged in users. User must log on -->
+                <a id='NavPreLoginSearch' onclick="classSchedulePreLoginTableConstructor();show('classSchedulePreLoginRendered');document.getElementById('classSchedulePreLoginRendered').scrollIntoView();"
+                    class="cp"><i class="fas fa-search"></i>&nbsp;&nbsp;&nbsp;SEARCH / ENROLL</i></a>
+                <a id='Nav2' style="display: none" onclick="show('classSchedule');show('ClassSearch');document.getElementById('classSchedule').scrollIntoView();"
+                    class="cp"><i class="fas fa-search"></i>&nbsp;&nbsp;&nbsp;SEARCH / ENROLL</i></a>
+                <div id='Nav3' style="display: none" class="subnav">
+                    <button class="subnavbtn"><i class="far fa-credit-card" class="cp"></i>&nbsp;&nbsp;&nbsp;PAYMENTS
+                        <i class="fa fa-caret-down"></i></button>
+                    <div class="subnav-content" class="cp">
+                        <a onclick="getBalDue();show('chargesDiv');document.getElementById('chargesDiv').scrollIntoView();" class="cp"><i
+                                class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;OUTSTANDING CHARGES</a>
+                        <a onclick="getPayments();show('paymentsDiv');document.getElementById('paymentsDiv').scrollIntoView();" class="cp"><i
+                                class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;PREVIOUS PAYMENTS</a>
+                        <a onclick="getBalDue();show('chargesDiv');document.getElementById('chargesDiv').scrollIntoView();" class="cp"><i
+                                class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;MAKE PAYMENT</a>
+                        <a onclick="getAutoPayInfo();show('paymentInfo');document.getElementById('paymentInfo').scrollIntoView();" class="cp"><i
+                                class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;PAYMENT INFO</a>
+                    </div>
+                </div>
+                <a onclick="sendEmail('');" class="cp">
+                    <i class="far fa-envelope"></i>&nbsp;&nbsp;&nbsp;EMAIL OFFICE</i>
+                </a>
+                <a id='Nav4' style="display: none" id="changePWBtn" onclick="show('PwChgFrm-modal-overlay');show('PwChgFrm');"
+                    class="cp">
+                    <i class="fas fa-unlock-alt"></i>&nbsp;&nbsp;&nbsp;CHANGE PASSWORD</i>
+                </a>
+                <a id='Nav5' style="display: none" id="logoutBtn" onclick="logoutFunct();" class="cp">
+                    <i class="fas fa-sign-out-alt"></i>&nbsp;&nbsp;&nbsp;LOGOUT</i>
+                </a>
+            </div>
+            <div><p id='DisabledTopMsg' style="display: none;">DisabledTopMsg</p></div>
+        </header>
+        <!-- LOGIN -->
+        <div class="pnl" id='login' style="display: none">
+            <h4>
+                <i class="fas fa-user"></i>&nbsp;&nbsp;&nbsp;Login:</h4>
+            <p>
+                <input class="input animate-input" type="text" id="userField" name="username" style="width:70%"
+                    required>
+                <label>&nbsp;Email</label>
+            </p>
+            <p>
+                <input class="input animate-input" type="password" id="passwrdField" name="password" style="width:70%"
+                    required>
+                <label>&nbsp;Password</label>
+            </p>
+            <p><a class="cp moble-label full-width" style="color:#2196F3; font-weight: bold;font-shadow: white" onclick="show('PwRecoverFrm-modal-overlay');show('PwRecoverFrm');">Forgot
+                    Password?</a></p>
+            <p>
+                <p id="loginError"></p>
+                <button id='loginButton' onclick="onLogin(); return false;" class="bl_btn hbl_btn full-width">
+                    <i class="fas fa-sign-in-alt"></i> &nbsp;&nbsp;&nbsp;LOG IN</button>
+            </p>
+            <button onclick="show('NewActFrm-modal-overlay');show('NewActFrm');" class="bl_btn hbl_btn full-width">
+                <i class="fas fa-user-plus"></i>&nbsp;&nbsp;&nbsp;NEW ACCOUNT</button>
+        </div>
+        <!-- GYM VIDEO -->
+        <!-- <div class="wp" id="gymVideo" style="text-align: center;background-image:url('images/gym.gif');background-size:100%;"></div> -->
+        <!-- FAMILY INFO -->
+        <div class="header" id="familyInfo" style="display:none">
+            <h4>
+                <i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Family Information</h4>
+
+            <div>
+                <div id="familyInfoInner">
+                    <table id="FI_ContactInfoTable" style="all:unset; border-collapse: collapse; box-shadow:unset;position: absolute; border: none!important;  width:30%!important;">
+                        <tbody style="all:unset">
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <div>Parent: </div>
+                                </td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FIParentName">John Smith</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">Email: </td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FIEmail"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">Phone: </td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FIPhone">(555) 555-5555</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">Address:&nbsp;&nbsp;</td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FIAddress">111 Placeholder St.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">&nbsp;</td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FICity">PlaceholderVale</span>,&nbsp;
+                                    <span id="FIState">CA</span>
+                                    <span id="FIZip">12345</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table id="FI_BalancesTable" style="all:unset; border-collapse: collapse; text-align: right; box-shadow:unset; border: 1px solid #a5a5a5 ; float:right;width: unset">
+                        <tbody>
+                            <tr>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">&nbsp;&nbsp;Balance:</td>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">
+                                    <span id="FIBal">$0.00</span>
+                                    &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">&nbsp;&nbsp;Account
+                                    Credit:</td>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">
+                                    <span id="FIAccCredit">$0.00</span>&nbsp;&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">&nbsp;&nbsp;Adj
+                                    Balance:</td>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">
+                                    <span id="FIAdjustedBal">$0.00</span>&nbsp;&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">&nbsp;&nbsp;Last
+                                    Payment Date:</td>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">
+                                    <span id="FILastPayDate">1/1/2001</span>&nbsp;&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">&nbsp;&nbsp;Last
+                                    Payment Amount:</td>
+                                <td style="border: none; text-align: right; padding:0; margin:0;">
+                                    <span id="FILastPayAmount">$0.00</span>&nbsp;&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <!-- PAYMENT INFO -->
+        <div class="header" id="paymentInfo" style="display:none">
+            <a style="float:right; margin:10px;" type="button" onclick="hide('paymentInfo');document.getElementById('familyInfo').scrollIntoView();"
+                class="closeBtn"><i class="far fa-window-close"></i></a>
+
+            <h4>
+                <i class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;Payment Information</h4>
+            <div id="paymentInfoInner">
+                <div id="FITable">
+                    <table id="FI_PaymentInfoTable" style="all:unset; border-collapse: collapse; box-shadow:unset;position: absolute; border: none!important;  width:30%!important;">
+                        <tbody style="all:unset">
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <div>Card Name: </div>
+                                </td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FICardName">John Smith</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">Exp Date: </td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FIExpDate">1/1/2018</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">Card Type: </td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FIPassCardType">Visa&nbsp;&nbsp;&nbsp;<i class="fab fa-cc-visa"></i></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">Card Num: </td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FIPassCardNum">***********1111</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">Card
+                                    Address:&nbsp;&nbsp;</td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FICardAddress">111 Placeholder St.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">&nbsp;</td>
+                                <td style="border: none; text-align: left; padding:0; margin:0;">
+                                    <span id="FICardCity">PlaceholderVale</span>,&nbsp;
+                                    <span id="FICardState">CA</span>
+                                    <span id="FICardZip">12345</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div><br><br>
+        </div>
+        <!-- MY STUDENTS -->
+        <div class="header" id='classSchedule' style="display:none">
+            <a style="float:right; margin:10px;" type="button" onclick="hide('classSchedule');hide('ClassSearch');document.getElementById('familyInfo').scrollIntoView();"
+                class="closeBtn"><i class="far fa-window-close"></i></a>
+            <h4>
+                <i class="fas fa-child"></i>&nbsp;&nbsp;&nbsp;My Students</i>
+            </h4>
+            <p>Click on a student you wish to enroll, or to view more details of classes a student is currently
+                enrolled in.</p>
+            <div class="contentspace" id='mystudents' style="overflow:auto"></div>
+            <br><br>
+            <!-- <div id="addStudentBtnDiv"> -->
+            <button id="addStudentBtn" onclick="show('AddStudentFrm-modal-overlay');show('AddStudentFrm');" class="bl_btn hbl_btn half-width">
+                <i class="fas fa-user-plus"></i>&nbsp;&nbsp;&nbsp;ADD STUDENT</i>
+            </button>
+            <!-- </div> -->
+        </div>
+        <!-- PRE-LOGIN CLASS SCHEDULE FETCH classschedulesprefetched -->
+        <div class="header" id='classScheduleprefetcheddata' style="display: none"  >
+            <#classschedulesprefetched>
+        </div>
+        <!-- PRE-LOGIN CLASS SCHEDULE RENDERED -->
+        <div class="header" id='classSchedulePreLoginRendered' style="display: none" >
+            <div class="" style="align-content:flex-start;flex-direction: row;" id="classSchedulePreLoginRenderedDiv"></div>
+        </div>
+        <!-- ENROLL/SEARCH -->
+        <div class="header" id='ClassSearch' style="display: none;align-content:flex-start;flex-direction: row;">
+            <a style="float:right; margin:10px;" type="button" onclick="hide('ClassSearch');document.getElementById('familyInfo').scrollIntoView();"
+                class="closeBtn"><i class="far fa-window-close"></i></a>
+            <h4 id='studentName'>
+                <i class="fas fa-search"></i>&nbsp;&nbsp;&nbsp;Search For A Class / Enroll</h4>
+            <br>
+            <div id="searchItemsDiv">
+                <div style="position: relative;display: block;">
+                    <div class="tooltip" id="hoverhelp" onmouseover="hOver();" onmouseout="hNotOver();">
+                        <span class="tooltiptext">1. Verify you have the correct student selected (If logged in).
+                            <br>
+                            <br>2. Select items to filter, then click the Search Classes button.
+                            <br>
+                            <br>3. Click a class you wish to enroll your student in. Some classes may only be enrolled
+                            by phone.</span>
+                        <div>Student Age:
+                            <select class="select" id="Student_Age">
+                                <option value="" selected>Student Age</option>
+                                <option value="0-1">0-1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18+</option>
+                            </select>
+                        </div>
+                        <div>Gender:
+                            <select class="select" id="Gender">
+                                <option value="" selected>Student Gender</option>
+                                <option value="Girl">Girls</option>
+                                <option value="Boy">Boys</option>
+                                <option value="Coed">Coed</option>
+                                <option value="Any">Any</option>
+                            </select>
+                        </div>
+                        <div>Level:
+                            <select class="select" id="Level">
+                                <option value="" selected>Student Level</option>
+                            </select>
+                        </div>
+                        <div>Class Type:
+                            <select class="select" id="ClassType">
+                                <option value="" selected>Class Type</option>
+                            </select>
+                        </div>
+                        <br>
+                        <select id="classTime" style="display: none;">
+                            <option value="" selected>Class Start Time</option>
+                        </select>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="tooltip">
+                    <span class="tooltiptext">Click a day to Select / Unselect</span>
+                    <table id="dowSearchTable" class="calendarSearch" style="all:unset;">
+                        <tbody>
+                            <tr>
+                                <td id="SearchSun" style="font-weight: 100 ;cursor: pointer; color:#888;">Sun</td>
+                                <td id="SearchMon" style="font-weight: 100 ;cursor: pointer; color:#888;">Mon</td>
+                                <td id="SearchTue" style="font-weight: 100 ;cursor: pointer; color:#888;">Tue</td>
+                                <td id="SearchWed" style="font-weight: 100 ;cursor: pointer; color:#888;">Wed</td>
+                                <td id="SearchThu" style="font-weight: 100 ;cursor: pointer; color:#888;">Thu</td>
+                                <td id="SearchFri" style="font-weight: 100 ;cursor: pointer; color:#888;">Fri</td>
+                                <td id="SearchSat" style="font-weight: 100 ;cursor: pointer; color:#888;">Sat</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <br>
+                <div class="tooltip">
+                    <span class="tooltiptext">Inclusive -- Classes NOT LIMITED to selected days of the week.<br>Exclusive -- Classes ARE LIMITED to selected days of the week.</span>
+                <p>
+                    <input type="radio" name="clusive" id='inclusive' data-value="true" checked><label for="inclusive">Inclusive</label>
+                    <br>
+                    <input type="radio" name="clusive" id='exclusive' data-value="false"><label for="exclusive">Exclusive</label>
+                    <br>
+                </p>
+                </div>
+                <br>
+                <br>
+                <button id="SubmitRequestToServerBtn" onclick="SubmitRequestToServer();" class="bl_btn hbl_btn half-width">
+                    <i class="fas fa-graduation-cap"></i>&nbsp;&nbsp;&nbsp;SEARCH CLASSES</i>
+                </button>
+                <button onclick="resetSearch();" class="bl_btn hbl_btn half-width">RESET</button>
+            </div>
+            <br>
+            <br>
+            <div class="" style="align-content:flex-start;flex-direction: row;" id="searchResultsTable2div"></div>
+        </div>
+        <!-- CHARGES AND BALANCE -->
+        <div class="header" id="chargesDiv" style="display:none">
+            <a style="float:right; margin:10px;" type="button" onclick="hide('chargesDiv');document.getElementById('familyInfo').scrollIntoView();"
+                class="closeBtn"><i class="far fa-window-close"></i></a>
+            <h4>
+                <i class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;Outsanding Charges And Account Balance</h4>
+            <div id="balDueDiv"></div>
+            <br>
+            <button onclick="clearPaySelected()" class="bl_btn hbl_btn half-width">
+                <i class="far fa-square"></i>&nbsp;&nbsp;&nbsp;Select None</button>
+            <button onclick="allPaySelected()" class="bl_btn hbl_btn half-width">
+                <i class="far fa-check-square"></i>&nbsp;&nbsp;&nbsp;Select All</button>
+                <button class="bl_btn hbl_btn" id="OwedPntBtn" type="button" onclick="show('makeItemizedPaymentFrm');printData('paymentItemizedDetailsDiv2');"><i class="fas fa-print"></i>&nbsp;&nbsp;&nbsp;Print Selected</button>
+            <br><br>
+            <button onclick="show('makeItemizedPaymentFrm-modal-overlay');show('makeItemizedPaymentFrm');" class="bl_btn hbl_btn half-width">
+                <i class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;PAY SELECTED</button>
+            <button onclick="show('makePaymentFrm-modal-overlay');show('makePaymentFrm');" class="bl_btn hbl_btn half-width">
+                <i class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;PAY FULL BALANCE</button>
+        </div>
+        <!-- PAYMENTS -->
+        <div class="header" id="paymentsDiv" style="display:none">
+            <a style="float:right; margin:10px;" type="button" onclick="hide('paymentsDiv');document.getElementById('familyInfo').scrollIntoView();"
+                class="closeBtn"><i class="far fa-window-close"></i></a>
+            <h4>
+                <i class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;Previous Payments</h4>
+            <div id="prevPaymentsDiv"></div>
+            <br>
+            <button class="bl_btn hbl_btn" id="PaymentPntBtn" type="button" onclick="printData('paymentsTable');"><i class="fas fa-print"></i>&nbsp;&nbsp;&nbsp;Print</button>
+            <!-- <button onclick="show('makePaymentFrm');" class="bl_btn hbl_btn half-width">
+            <i class="far fa-credit-card"></i>&nbsp;&nbsp;&nbsp;Pay Balance</button> -->
+        </div>
+        <!-- SEND EMAIL -->
+        <!-- <div class="pnl cp" onclick="sendEmail('');"> -->
+        <!-- <h4><i class="far fa-envelope"></i>&nbsp;&nbsp;&nbsp;Email Office Staff</h4>Click to email office staff.</div> -->
+        <!-- LOGOUT -->
+        <!-- <div class="pnl cp" id="logoutDiv" onclick="startupCookieAMR();" style="display:none"> -->
+        <!-- <h4><i class="fas fa-sign-out-alt"></i>&nbsp;&nbsp;&nbsp;Log Out</h4>Click to log out.</div> -->
+        <!-- CHANGE PASSWORD -->
+        <!-- <div class="pnl cp" id="chgPwDiv" style="display:none" onclick="show('PwChgFrm');"> -->
+        <!-- <h4><i class="fas fa-unlock-alt"></i>&nbsp;&nbsp;&nbsp;Change Password</h4>Click to change password.</div> -->
+        <!-- FORMS -->
+        <!-- NEW ACCOUNT FORM -->
+        <div class="modal-overlay" id="NewActFrm-modal-overlay" style="display: none"></div>
+        <form id="NewActFrm" class="modal" action="#" onsubmit="return regNewAcct();">
+            <button style="float:right; margin:10px;" type="button" onclick="hide('NewActFrm-modal-overlay');hide('NewActFrm');"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <h4>Register New Account</h4>
+                   <p><span id="newAccountFrmMsg"></span></p>
+                    <p>If you need help, please <a onclick="sendEmail('new');" style="color:#2196F3;" class="cp"> Email office staff.</a>
+                    </p>
+                    <p>
+                        <br>
+                        <label id='emailerror' style="display:none;color:red">Please enter a valid email Address!</label>
+                        <input class="input animate-input" id="newAccountEmail" type="email" style="width:50%" required
+                            placeholder="sample@example.com">
+                        <label>&nbsp;Email Address</label>
+                    </p>
+                    <br>
+                    <p>
+                        <button class="bl_btn hbl_btn" id="regNewAcctBtn" type="button" onclick="regNewAcct();">Register</button>
+                    </p>
+                    <button onclick="hide('NewActFrm-modal-overlay');hide('NewActFrm');" type="button" class="rd_btn hrd_btn">Cancel</button>
+                    <input submit disabled style="display:none">
+                </div>
+            </div>
+        </form>
+        <!-- CHANGE PASSWORD FORM -->
+        <div class="modal-overlay" id="PwChgFrm-modal-overlay" style="display: none"></div>
+        <form id="PwChgFrm" class="modal" action="#" onsubmit="changePWSubmit();">
+            <button style="float:right; margin:10px;" type="button" onclick="hide('PwChgFrm-modal-overlay');hide('PwChgFrm');clearPWFrm();"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <h4>Change Password</h4>
+                    <br>
+                    <p> Password must contain at least 6 characters. Must include UPPER/lowercase and numbers!</p>
+                    <p>
+                        <input class="input animate-input" id="currentPw" type="password" style="width:50%" required>
+                        <label>&nbsp;Current Password</label>
+                    </p>
+                    <label id='pwError' style="display:none;color:red"> Password must contain at least 6 characters.
+                        Must include UPPER/lowercase and numbers!</label>
+                    <p>
+                        <input class="input animate-input" id="newPwFirst" type="password" style="width:50%" title="Password must contain at least 6 characters. Must include UPPER/lowercase and numbers!"
+                            required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}">
+                        <label>&nbsp;New Password</label>
+                    </p>
+                    <label id='pwMatchError' style="display:none;color:red">Passwords Do Not Match!</label>
+                    <p>
+                        <input class="input animate-input" id="newPwSecond" type="password" style="width:50%" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}">
+                        <label>&nbsp;New Password (Again)</label>
+                    </p>
+                    <br>
+                    <br>
+                    <p>
+                        <button class="bl_btn hbl_btn" id="changePWSubmitBtn" type="button" onclick="changePWSubmit();">Change</button>
+                    </p>
+                    <button type="button" onclick="hide('PwChgFrm-modal-overlay');hide('PwChgFrm');clearPWFrm();" class="rd_btn hrd_btn">Cancel</button>
+                    <input submit disabled style="display:none">
+                </div>
+            </div>
+        </form>
+        <!-- RECOVER PASSWORD FORM -->
+        <div class="modal-overlay" id="PwRecoverFrm-modal-overlay" style="display: none"></div>
+        <form id="PwRecoverFrm" class="modal" action="#" onsubmit="return recoverPWSubmit()">
+            <button style="float:right; margin:10px;" type="button" onclick="hide('PwRecoverFrm-modal-overlay');hide('PwRecoverFrm');"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <h4>Recover Password</h4>
+                    <br>
+                    <P>Please enter the email address you registered with, and a temporary password will be emailed to
+                        you.</P>
+                    <p>If you do not remember the email address you registered with, please
+                        <a onclick="sendEmail('recover');" style="color:#2196F3;" class="cp"> Email office staff.</a>
+                    </p>
+                    <label id='emailerror_rec' style="display:none;color:red">Please enter a valid email Address!</label>
+                    <p>
+                        <input class="input animate-input" id="recoverEmailAdr" type="email" style="width:50%" required
+                            placeholder="sample@example.com">
+                        <label>&nbsp;Email Address</label>
+                    </p>
+                    <br>
+                    <p>
+                        <button class="bl_btn hbl_btn" id="recoverEmailBtn" type="button" onclick="recoverPWSubmit();">RECOVER
+                            PASSWORD</button>
+                    </p>
+                    <button type="button" onclick="hide('PwRecoverFrm-modal-overlay');hide('PwRecoverFrm');" class="rd_btn hrd_btn">Cancel</button>
+                    <input submit disabled style="display:none">
+                </div>
+            </div>
+        </form>
+        <!-- ENROLL CONFIRM FORM -->
+        <div class="modal-overlay" id="EnrollConfFrm-modal-overlay" style="display: none"></div>
+        <form id="EnrollConfFrm" class="modal" action="#" onsubmit="return EnrollStudent()">
+            <button style="float:right; margin:10px;" type="button" onclick="hide('EnrollConfFrm-modal-overlay');hide('EnrollConfFrm');"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <h4>Confirm Student Enrollment</h4>
+                    <br>
+                    <P>Important!</p>
+                        <p>Once you add a student, you will need to contact office staff to edit/remove them. Please double-check details before submission.</P>
+                    <br>
+                    <div id="enrollConfDetailsDiv"></div>
+                    <div class="divTable">
+                        <div class="divTableBody">
+                            <div class="divTableRow" id="sunDiv">
+                                <div class="divTableCell">Sunday Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="sunStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="monDiv">
+                                <div class="divTableCell">Monday Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="monStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="tueDiv">
+                                <div class="divTableCell">Tuesday Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="tueStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="wedDiv">
+                                <div class="divTableCell">Wednesday Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="wedStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="thuDiv">
+                                <div class="divTableCell">Thursday Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="thuStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="friDiv">
+                                <div class="divTableCell">Friday Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="friStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="satDiv">
+                                <div class="divTableCell">Saturday Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="satStartSpan"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <p>If you have any questions, please
+                        <a onclick="sendEmail('enroll');" style="color:#2196F3;" class="cp"> Email office staff.</a>
+                    </p>
+                    <br>
+                    <p>
+                        <button class="bl_btn hbl_btn" id="EnrollConfBtn" type="button" onclick="EnrollStudent();">CONFIRM
+                            ENROLLMENT</button>
+                    </p>
+                    <button type="button" id="EnrollHideBtn" onclick="hide('EnrollConfFrm-modal-overlay');hide('EnrollConfFrm');"
+                        class="rd_btn hrd_btn">Cancel</button>
+                    <input submit disabled style="display:none">
+                </div>
+            </div>
+        </form>
+        <!-- ENROLL REQUEST FORM -->
+        <div class="modal-overlay" id="EnrollReqFrm-modal-overlay" style="display: none"></div>
+        <form id="EnrollReqFrm" class="modal" action="#" onsubmit="return EnrollStudent()">
+            <button style="float:right; margin:10px;" type="button" onclick="hide('EnrollReqFrm-modal-overlay');hide('EnrollReqFrm');"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <h4>Request Student Enrollment</h4>
+                    <br>
+                    <P>Please confirm these details are correct.</P>
+                    <br>
+                    <input class="input animate-input" id="reqEnrollStudentName" type="text" style="width:50%" required
+                        placeholder="First Last">
+                    <label>&nbsp;Student Name</label>
+                    </p>
+                    <br>
+                    <input class="input animate-input" id="reqEnrollParentName" type="text" style="width:50%" required
+                        placeholder="First Last">
+                    <label>&nbsp;Parent Name</label>
+                    </p>
+                    <br>
+                    <input class="input animate-input" id="reqEnrollPhone" type="text" style="width:50%" required
+                        placeholder="">
+                    <label>&nbsp;Parent Phone Number</label>
+                    </p>
+                    <br>
+                    <label id='emailerror_rec' style="display:none;color:red">Please enter a valid email Address!</label>
+                    <input class="input animate-input" id="reqEnrollEmailAdr" type="email" style="width:50%" required
+                        placeholder="sample@example.com">
+                    <label>&nbsp;Email Address</label>
+                    </p>
+                    <br>
+
+                    <div id="enrollReqDetailsDiv"></div>
+                    <div class="divTable">
+                        <div class="divTableBody">
+                            <div class="divTableRow" id="sunDiv">
+                                <div class="divTableCell">Sun Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="sunStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="monDiv">
+                                <div class="divTableCell">Mon Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="monStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="tueDiv">
+                                <div class="divTableCell">Tue Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="tueStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="wedDiv">
+                                <div class="divTableCell">Wed Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="wedStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="thuDiv">
+                                <div class="divTableCell">Thu Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="thuStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="friDiv">
+                                <div class="divTableCell">Fri Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="friStartSpan"></span>
+                                </div>
+                            </div>
+                            <div class="divTableRow" id="satDiv">
+                                <div class="divTableCell">Sat Start Time:&nbsp;</div>
+                                <div class="divTableCell">
+                                    <span id="satStartSpan"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <p>If you have any questions, please
+                        <a onclick="sendEmail('requestEnroll');" style="color:#2196F3;" class="cp">
+                            Email office staff.</a>
+                    </p>
+                    <br>
+                    <p>
+                        <button class="bl_btn hbl_btn" id="EnrollReqBtn" type="button" onclick="sendEmail('requestEnroll');">REQUEST
+                            ENROLLMENT</button>
+                    </p>
+                    <button type="button" onclick="hide('EnrollReqFrm-modal-overlay');hide('EnrollReqFrm');" class="rd_btn hrd_btn">Cancel</button>
+                    <input submit disabled style="display:none">
+                </div>
+            </div>
+        </form>
+        <!-- MAKE A PAYMENT FORM -->
+        <div class="modal-overlay" id="makePaymentFrm-modal-overlay" style="display: none"></div>
+        <form id="makePaymentFrm" class="modal" action="#" onsubmit="return ()">
+            <button style="float:right; margin:10px;" type="button" onclick="hide('makePaymentFrm-modal-overlay');hide('makePaymentFrm');"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <h4>Submit A Payment</h4>
+                    <br>
+                    <P>Please confirm these details are correct.</P>
+                    <br>
+                    <div id="paymentDetailsDiv"></div>
+                    <br>
+                    <p>If you have any questions, please
+                        <a onclick="sendEmail('makePayment');" style="color:#2196F3;" class="cp">
+                            Email office staff.</a>
+                    </p>
+                    <br>
+                    <!-- <p> <input class="input animate-input" id="paymentAmount" type="number" step="0.01" min="0" max="1000" style="width:50%" required placeholder="$0.00"><label>&nbsp;Amount To Pay</label></p><br> -->
+                    <p>
+                        <button class="bl_btn hbl_btn" id="makePaymentBtn" type="button" onclick="submitPayment();">SUBMIT
+                            PAYMENT</button>
+                        <button class="bl_btn hbl_btn" id="makePaymentPntBtn" type="button" onclick="printData('balDueAmountTable');"><i class="fas fa-print"></i>&nbsp;&nbsp;&nbsp;Print</button>
+                    </p>
+                    <button type="button" onclick="hide('makePaymentFrm-modal-overlay');hide('makePaymentFrm');" class="rd_btn hrd_btn">Cancel</button>
+                    <input submit disabled style="display:none">
+                </div>
+            </div>
+        </form>
+        <!-- MAKE ITEMIZED PAYMENT FORM -->
+        <div class="modal-overlay" id="makeItemizedPaymentFrm-modal-overlay" style="display: none"></div>
+        <form id="makeItemizedPaymentFrm" class="modal" action="#" onsubmit="return ()">
+            <button style="float:right; margin:10px;" type="button" onclick="hide('makeItemizedPaymentFrm-modal-overlay');hide('makeItemizedPaymentFrm');"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <h4>Submit An Itemized Payment</h4>
+                    <br>
+                    <P>Please confirm these details are correct.</P>
+                    <br>
+                    <div id="paymentItemizedDetailsDiv"></div>
+                    <div id="paymentItemizedDetailsDiv2"></div>
+
+                    <br>
+                    <p>If you have any questions, please
+                        <a onclick="sendEmail('makeItemizedPayment');" style="color:#2196F3;" class="cp">
+                            Email office staff.</a>
+                    </p>
+                    <br>
+                    <!-- <p> <input class="input animate-input" id="paymentAmount" type="number" step="0.01" min="0" max="1000" style="width:50%" required placeholder="$0.00"><label>&nbsp;Amount To Pay</label></p><br> -->
+                    <p>
+                        <button class="bl_btn hbl_btn" id="makeItemizedPaymentBtn" type="button" onclick="submitItemizedPayment();">SUBMIT
+                            PAYMENT</button>
+                        <button class="bl_btn hbl_btn" id="makeItemizedPaymentPntBtn" type="button" onclick="printData('paymentItemizedDetailsDiv2');"><i class="fas fa-print"></i>&nbsp;&nbsp;&nbsp;Print</button>
+                    </p>
+                    <button type="button" onclick="hide('makeItemizedPaymentFrm-modal-overlay');hide('makeItemizedPaymentFrm');"
+                        class="rd_btn hrd_btn">Cancel</button>
+                    <input submit disabled style="display:none">
+                </div>
+            </div>
+        </form>
+        <!-- ADD STUDENT FORM -->
+        <div class="modal-overlay" id="AddStudentFrm-modal-overlay" style="display: none"></div>
+        <form id="AddStudentFrm" class="modal" action="#" onsubmit="return recoverPWSubmit()">
+            <button style="float:right; margin:10px;" type="button" onclick="hide('AddStudentFrm-modal-overlay');hide('AddStudentFrm');"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <h4>Add A New Student</h4>
+                    <br>
+                    <P>Important!</p>
+                    <p>Once you add a student, you will need to contact office staff to edit/remove them. Please double-check details before submission.</P>
+                    <p>If you need help, please
+                        <a onclick="sendEmail('AddStudent');" style="color:#2196F3;" class="cp"> Email office staff.</a>
+                    </p>
+                    <p><label id='fNameError' style="display:none;color:red">Name must only include normal characters!</label>
+                        <input class="input animate-input" id="add_First_Name" type="text" style="width:50%" required
+                            placeholder="First">
+                        <label>&nbsp;First Name</label>
+                    </p>
+                    <p><label id='lNameError' style="display:none;color:red">Name must only include normal characters!</label>
+                        <input class="input animate-input" id="add_Last_Name" type="text" style="width:50%" required
+                            placeholder="Last">
+                        <label>&nbsp;Last Name</label>
+                    </p>
+                    <p style="display: inline-block;margin-bottom: 0px;">
+                        <input type="radio" name="add_Gender" id='add_Gender_Female' data-value="true" checked><label for="add_Gender_Female">Female</label>
+                        <input type="radio" name="add_Gender" id='add_Gender_Male' data-value="false"><label for="add_Gender_Male">Male</label>
+                    </p><label style="display: block;">&nbsp;Gender</label>
+
+                    <br>
+                    <p>
+                        <input class="input animate-input" type="text" id="datepicker" style="width:50%" required
+                            placeholder="01/01/2001">
+                        <label>&nbsp;Birthdate</label>
+                    </p>
+                    <br>
+                    <p>
+                        <button class="bl_btn hbl_btn" id="addStudentBtn" type="button" onclick="addStudentSubmit();">ADD
+                            STUDENT</button>
+                    </p>
+                    <button type="button" onclick="hide('AddStudentFrm-modal-overlay');hide('AddStudentFrm');" class="rd_btn hrd_btn">Cancel</button>
+                    <input submit disabled style="display:none">
+                </div>
+            </div>
+        </form>
+        <!-- DISABLED FORM -->
+        <div class="modal-overlay" id="DisabledFrm-modal-overlay" style="display: none"></div>
+        <form id="DisabledFrm" class="modal" action="#" onsubmit="return ()">
+            <button style="float:right; margin:10px;" type="button" onclick="logoutFunct();"
+                class="closeBtn"><i class="far fa-window-close"></i></button>
+            <div class="modal-content">
+                <div class="container">
+                    <div >
+                        <br><br><br>
+                        <h1 id="DisabledFrmMsg" style="color:red;text-align: center;">Big Scary Error Message</h1>
+                    </div>
+                </div>
+            </div>
+        </form>
+</body>
+
+</html>
+<!-- Author: alex.rybicki@gmail.com -->
